@@ -1,14 +1,11 @@
 /* General Body and Font Styling */
 body {
-    background-color: #E5DDD5; /* WhatsApp-like background color */
     font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
 }
 
 /* Main Streamlit container adjustments */
 [data-testid="stAppViewContainer"] {
-    background-image: url("https://i.imgur.com/j5M4HQU.png"); /* Subtle background pattern */
-    background-repeat: repeat;
-    background-size: 300px;
+    background-color: #D6DBD7; /* A neutral, clean background */
 }
 
 /* Hide Streamlit's default header and footer */
@@ -22,11 +19,89 @@ body {
     border-right: 1px solid #e0e0e0;
 }
 
-/* Chat Input Styling */
+/* --- CHAT HEADER --- */
+.chat-header {
+    background-color: #F0F2F5; /* Matches sidebar */
+    padding: 10px 15px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #D1D7DB;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.avatar-header {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #007BFF; /* A vibrant blue */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+    margin-right: 15px;
+}
+
+.header-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.header-title {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #111B21;
+}
+
+.header-status {
+    font-size: 0.8rem;
+    color: #54656F;
+}
+
+
+/* --- CHAT MESSAGES --- */
+.message-container {
+    display: flex;
+    margin: 5px 10px;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.user-message {
+    justify-content: flex-end;
+}
+
+.bot-message {
+    justify-content: flex-start;
+}
+
+.bubble {
+    max-width: 75%;
+    padding: 10px 15px;
+    border-radius: 18px;
+    line-height: 1.5;
+    box-shadow: 0 1px 1px rgba(0,0,0,0.08);
+    word-wrap: break-word;
+}
+
+.user-message .bubble {
+    background-color: #E7FFDB; /* A softer green */
+    color: #111B21;
+    border-bottom-right-radius: 5px;
+}
+
+.bot-message .bubble {
+    background-color: #FFFFFF;
+    color: #111B21;
+    border-bottom-left-radius: 5px;
+}
+
+/* --- CHAT INPUT --- */
 [data-testid="stChatInput"] {
     background-color: #F0F2F5;
-    border-top: 1px solid #e0e0e0;
-    padding: 10px 20px;
+    border-top: 1px solid #D1D7DB;
+    padding: 15px;
 }
 
 .stTextInput > div > div > input {
@@ -36,62 +111,7 @@ body {
     padding: 10px 15px;
 }
 
-/* Message Container for alignment */
-.message-container {
-    display: flex;
-    margin: 10px 0;
-    animation: fadeIn 0.5s ease-in-out;
-}
-
-/* User Message Styling */
-.user-message {
-    justify-content: flex-end; /* Aligns user messages to the right */
-}
-
-/* Bot Message Styling */
-.bot-message {
-    justify-content: flex-start; /* Aligns bot messages to the left */
-}
-
-/* Chat Bubble Base Style */
-.bubble {
-    max-width: 70%;
-    padding: 12px 18px;
-    border-radius: 20px;
-    line-height: 1.5;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-    word-wrap: break-word;
-}
-
-/* User Bubble Specific Style */
-.user-message .bubble {
-    background-color: #DCF8C6; /* Light green for user */
-    color: #303030;
-    border-bottom-right-radius: 5px;
-}
-
-/* Bot Bubble Specific Style */
-.bot-message .bubble {
-    background-color: #FFFFFF; /* White for bot */
-    color: #303030;
-    border-bottom-left-radius: 5px;
-}
-
-/* Bot Avatar Styling */
-.avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background-color: #A1C4FD; /* A friendly blue for the bot avatar */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    margin-right: 10px;
-    flex-shrink: 0; /* Prevents avatar from shrinking */
-}
-
-/* Feedback Buttons Styling */
+/* --- FEEDBACK BUTTONS --- */
 .stButton > button {
     background-color: #FFFFFF;
     border: 1px solid #D4D4D4;
@@ -107,7 +127,7 @@ body {
     transform: scale(1.1);
 }
 
-/* Animation for new messages */
+/* --- ANIMATION --- */
 @keyframes fadeIn {
   from {
     opacity: 0;
