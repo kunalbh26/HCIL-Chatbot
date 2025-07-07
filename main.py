@@ -24,11 +24,6 @@ def load_css(file_name):
     with open(file_name) as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-def get_image_as_base64(path):
-    """Function to encode a local image to base64."""
-    with open(path, "rb") as image_file:
-        return base64.b64encode(image_file.read()).decode()
-
 # Inject custom CSS
 load_css("style.css")
 
@@ -93,16 +88,13 @@ if uploaded_file is not None and not st.session_state.knowledge_base_loaded:
                 st.error("❌ Error: Missing required columns in Excel file. Please ensure 'questions' and 'answers' columns exist.")
             else:
                 st.session_state.df = df
-                # Create embeddings and the NearestNeighbors model
                 embeddings = model.encode(df['questions'].tolist())
                 nn_model = NearestNeighbors(n_neighbors=1, metric='cosine', algorithm='brute')
                 nn_model.fit(np.array(embeddings))
                 
-                # Store in session state
                 st.session_state.nn_model = nn_model
                 st.session_state.knowledge_base_loaded = True
-                st.session_state.messages = [] # Reset messages
-                st.session_state.chat_ended = False
+                st.session_state.messages = []
                 st.session_state.feedback_request = False
                 
                 st.success("✅ Knowledge base loaded! The bot is ready.")
@@ -116,38 +108,43 @@ if uploaded_file is not None and not st.session_state.knowledge_base_loaded:
 # -------------------------------
 if not st.session_state.knowledge_base_loaded:
     st.info("👋 Welcome! Please upload a knowledge base file in the sidebar to start the chat.")
-    st.image("https://i.imgur.com/v23y1D8.png", use_column_width=True) # A welcoming image
 else:
-    # Add initial bot message if chat is new
+    # --- Chat Header ---
+    st.markdown("""
+        <div class="chat-header">
+            <div class="avatar-header">🤖</div>
+            <div class="header-info">
+                <span class="header-title">HCIL IT Helpdesk</span>
+                <span class="header-status">Online</span>
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    # --- Chat Messages ---
     if not st.session_state.messages:
         st.session_state.messages.append({"role": "assistant", "content": "Hi there! I'm your friendly IT Helpdesk bot. How can I assist you today?"})
 
-    # Display chat messages
     for message in st.session_state.messages:
         role = message["role"]
         content = message["content"]
         if role == "assistant":
-            # Use a custom div for the bot's message to include an avatar
             st.markdown(f"""
             <div class="message-container bot-message">
-                <div class="avatar">🤖</div>
                 <div class="bubble">{content}</div>
             </div>
             """, unsafe_allow_html=True)
         else:
-            # Use a custom div for the user's message
             st.markdown(f"""
             <div class="message-container user-message">
                 <div class="bubble">{content}</div>
             </div>
             """, unsafe_allow_html=True)
 
-    # Handle feedback buttons
+    # --- Feedback Buttons ---
     if st.session_state.get('feedback_request'):
-        # Using a container to group the buttons
         feedback_container = st.container()
         with feedback_container:
-            col1, col2, col3 = st.columns([1, 1, 5])
+            col1, col2, _ = st.columns([1, 1, 5])
             with col1:
                 if st.button("👍", help="This was helpful!"):
                     st.session_state.messages.append({"role": "assistant", "content": "Great! I'm glad I could help. Feel free to ask another question."})
@@ -159,22 +156,17 @@ else:
                     st.session_state.feedback_request = False
                     st.rerun()
     
-    # Chat input field
+    # --- Chat Input ---
     if prompt := st.chat_input("Ask me an IT question..."):
-        # Add user message to chat history
         st.session_state.messages.append({"role": "user", "content": prompt})
         
-        # Check for exit keywords
         if prompt.lower().strip() in ["bye", "end", "quit", "exit"]:
             farewell = "Thank you for chatting. Have a great day! 👋"
             st.session_state.messages.append({"role": "assistant", "content": farewell})
             st.session_state.feedback_request = False
-            # We can add a small delay and then clear state if we want to "end" the session
-            # For now, just show the farewell and stop asking for feedback.
         else:
-            # Get and display bot response
             bot_response = get_bot_response(prompt, st.session_state.df, st.session_state.nn_model, model)
             st.session_state.messages.append({"role": "assistant", "content": bot_response})
-            st.session_state.feedback_request = True # Ask for feedback after a response
+            st.session_state.feedback_request = True
         
         st.rerun()
