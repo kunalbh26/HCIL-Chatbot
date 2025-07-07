@@ -1,8 +1,6 @@
 streamlit
 pandas
 numpy
-scikit-learn
 sentence-transformers
+scikit-learn
 openpyxl
-
-
