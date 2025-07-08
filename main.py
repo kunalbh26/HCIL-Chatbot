@@ -1,170 +1,170 @@
+# main.py
+
 import streamlit as st
 import pandas as pd
 import numpy as np
 from sentence_transformers import SentenceTransformer
 from sklearn.neighbors import NearestNeighbors
 import time
-import base64
 
-# --------------------------------
-# Page Configuration
-# --------------------------------
+# -------------------------------
+# Page Config
+# -------------------------------
 st.set_page_config(
-    page_title="HCIL IT Assistant",
+    page_title="HCIL IT Assistant Chatbot",
     page_icon="🤖",
-    layout="wide",
-    initial_sidebar_state="expanded",
+    layout="centered",
+    initial_sidebar_state="expanded"
 )
 
-# --------------------------------
-# Load Custom CSS
-# --------------------------------
+# -------------------------------
+# Custom Styling
+# -------------------------------
 def load_css(file_name):
     with open(file_name) as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 load_css("style.css")
 
-# --------------------------------
-# Load Model (Cached)
-# --------------------------------
+# -------------------------------
+# Load Model (cached)
+# -------------------------------
 @st.cache_resource
 def load_model():
     return SentenceTransformer("all-MiniLM-L6-v2")
 
 model = load_model()
 
-# --------------------------------
-# Helper Functions
-# --------------------------------
-def get_bot_response(user_query, df, nn_model, model):
-    # Handle greetings and exit
-    greetings = {"hi": "Hello there! 👋 How can I help you today?", 
-                 "hello": "Hi! Need help with something?", 
-                 "how are you": "I'm here and ready to assist you! 💻", 
-                 "hey": "Hey! How can I support you today?"}
-
-    exits = ["bye", "exit", "quit", "end"]
-
-    user_query_lower = user_query.lower().strip()
-
-    if user_query_lower in greetings:
-        return greetings[user_query_lower]
-
-    if user_query_lower in exits:
-        st.session_state.reset = True
-        return "Thank you for chatting with me! Have a great day! 👋"
-
-    with st.spinner("Thinking... 🤔"):
-        query_embed = model.encode([user_query])
-        distances, indices = nn_model.kneighbors(query_embed)
-        best_idx = indices[0][0]
-        response = df.iloc[best_idx]['answers']
-        time.sleep(1)
-    return response
-
-# --------------------------------
-# Sidebar Setup
-# --------------------------------
+# -------------------------------
+# Sidebar
+# -------------------------------
 with st.sidebar:
-    st.markdown("""
-        <div class="sidebar-header">HCIL</div>
-        <div class="sidebar-toggle" onclick="toggleSidebar()">⬅️</div>
-    """, unsafe_allow_html=True)
+    st.markdown('<div class="sidebar-title">HCIL</div>', unsafe_allow_html=True)
+    if st.button("⏪ Collapse Sidebar"):
+        st.experimental_set_query_params(sidebar="collapsed")
 
-    with st.expander("📂 Upload Knowledge Base", expanded=True):
-        uploaded_file = st.file_uploader(
-            "Upload an Excel File",
-            type=["xlsx"],
-            help="Ensure file has 'questions' and 'answers' columns."
-        )
+    st.markdown("### 📂 Upload Knowledge Base")
+    uploaded_file = st.file_uploader(
+        "Upload Excel file with 'questions' and 'answers' columns",
+        type=["xlsx"]
+    )
+    st.caption("🚗 Made with ❤️ for Honda Cars India")
 
-    st.caption("Crafted with ❤️ for HCIL")
-
-# --------------------------------
-# Initialize Session State
-# --------------------------------
-for key in ['knowledge_base_loaded', 'messages', 'feedback_request', 'reset']:
+# -------------------------------
+# Session Initialization
+# -------------------------------
+for key in ['knowledge_base_loaded', 'messages', 'feedback_request']:
     if key not in st.session_state:
-        st.session_state[key] = False if key == 'knowledge_base_loaded' else [] if key == 'messages' else False
+        st.session_state[key] = False if key == 'knowledge_base_loaded' else []
 
-# --------------------------------
+# -------------------------------
 # Load Knowledge Base
-# --------------------------------
+# -------------------------------
 if uploaded_file and not st.session_state.knowledge_base_loaded:
-    with st.spinner("🚀 Loading knowledge base..."):
-        try:
-            df = pd.read_excel(uploaded_file)
-            if not {'questions', 'answers'}.issubset(df.columns):
-                st.error("❌ Excel must have 'questions' and 'answers' columns.")
-            else:
-                st.session_state.df = df
-                embeddings = model.encode(df['questions'].tolist())
-                nn_model = NearestNeighbors(n_neighbors=1, metric='cosine', algorithm='brute')
-                nn_model.fit(np.array(embeddings))
+    try:
+        df = pd.read_excel(uploaded_file)
+        if {'questions', 'answers'}.issubset(df.columns):
+            embeddings = model.encode(df['questions'].tolist())
+            nn_model = NearestNeighbors(n_neighbors=1, metric='cosine').fit(np.array(embeddings))
+            st.session_state.update({
+                'df': df,
+                'nn_model': nn_model,
+                'knowledge_base_loaded': True,
+                'messages': [],
+                'feedback_request': False
+            })
+            st.success("✅ Knowledge base loaded! Let's go!")
+            st.rerun()
+        else:
+            st.error("Missing 'questions' and/or 'answers' columns.")
+    except Exception as e:
+        st.error(f"Error loading file: {e}")
 
-                st.session_state.nn_model = nn_model
-                st.session_state.knowledge_base_loaded = True
-                st.success("✅ Knowledge base loaded!")
-                time.sleep(1)
-                st.rerun()
-        except Exception as e:
-            st.error(f"❌ Failed to load knowledge base: {e}")
+# -------------------------------
+# Bot Logic
+# -------------------------------
+def get_bot_response(user_query):
+    greetings = ["hi", "hello", "hey", "how are you"]
+    exit_cmds = ["bye", "quit", "exit", "end"]
 
-# --------------------------------
-# Main Chat UI
-# --------------------------------
-if not st.session_state.knowledge_base_loaded:
-    st.markdown("""
-        <div class="center-title">
-            HCIL IT Assistant Chatbot
-        </div>
-    """, unsafe_allow_html=True)
-    st.info("Please upload a knowledge base to begin.")
-else:
-    st.markdown("""
-        <div class="chat-header">
-            <div class="avatar-header">🤖</div>
-            <div class="header-info">
-                <span class="header-title">HCIL IT Helpdesk</span>
-                <span class="header-status">Online</span>
-            </div>
-        </div>
-    """, unsafe_allow_html=True)
+    query_lower = user_query.strip().lower()
 
-    if st.session_state.reset:
-        st.session_state.messages = []
+    if any(greet in query_lower for greet in greetings):
+        return "Hi! 👋 How can I help you today?"
+
+    if any(exit_word in query_lower for exit_word in exit_cmds):
+        st.session_state.messages.append({
+            "role": "assistant",
+            "content": "Thank you for chatting. **Mata ne!** 👋 (see you later)"
+        })
         st.session_state.feedback_request = False
-        st.session_state.reset = False
+        time.sleep(1)
+        st.session_state.messages = []
+        st.rerun()
 
+    query_embed = model.encode([user_query])
+    distances, indices = st.session_state.nn_model.kneighbors(query_embed)
+    best_idx = indices[0][0]
+    distance = distances[0][0]
+
+    if distance > 0.4:  # Confidence threshold
+        return "Hmm 🤔 I’m not sure I understand that. Could you rephrase your question?"
+    else:
+        return st.session_state.df.iloc[best_idx]['answers']
+
+# -------------------------------
+# App Title
+# -------------------------------
+st.markdown("""
+<div class="persistent-header">
+    HCIL IT Assistant Chatbot
+</div>
+""", unsafe_allow_html=True)
+
+# -------------------------------
+# Main Chat UI
+# -------------------------------
+if not st.session_state.knowledge_base_loaded:
+    st.info("Please upload a valid knowledge base to begin chatting.")
+else:
     if not st.session_state.messages:
-        st.session_state.messages.append({"role": "assistant", "content": "Hi! I'm your IT assistant. Ask me anything."})
+        st.session_state.messages.append({
+            "role": "assistant",
+            "content": "Hi there! I'm your IT helpdesk assistant. Ask me anything!"
+        })
 
     for message in st.session_state.messages:
-        role, content = message["role"], message["content"]
-        bubble_class = "bot-message" if role == "assistant" else "user-message"
+        bubble_class = "bot-message" if message["role"] == "assistant" else "user-message"
         st.markdown(f"""
-        <div class="message-container {bubble_class}">
-            <div class="bubble">{content}</div>
-        </div>
+            <div class="message-container {bubble_class}">
+                <div class="bubble">{message['content']}</div>
+            </div>
         """, unsafe_allow_html=True)
 
+    # Feedback buttons
     if st.session_state.get('feedback_request'):
-        col1, col2, _ = st.columns([1, 1, 5])
+        col1, col2 = st.columns(2)
         with col1:
             if st.button("👍"):
-                st.session_state.messages.append({"role": "assistant", "content": "Glad I could help! Ask me anything else, or type 'bye' to end."})
+                st.session_state.messages.append({
+                    "role": "assistant",
+                    "content": "Glad to help! 😊 Ask me more or type 'bye' to exit."
+                })
                 st.session_state.feedback_request = False
                 st.rerun()
         with col2:
             if st.button("👎"):
-                st.session_state.messages.append({"role": "assistant", "content": "Sorry! Try rephrasing your question."})
+                st.session_state.messages.append({
+                    "role": "assistant",
+                    "content": "Sorry about that. 😓 Try rephrasing your question!"
+                })
                 st.session_state.feedback_request = False
                 st.rerun()
 
-    if prompt := st.chat_input("Ask me an IT question..."):
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        bot_response = get_bot_response(prompt, st.session_state.df, st.session_state.nn_model, model)
-        st.session_state.messages.append({"role": "assistant", "content": bot_response})
+    # Chat Input
+    if user_input := st.chat_input("Ask your IT question..."):
+        st.session_state.messages.append({"role": "user", "content": user_input})
+        response = get_bot_response(user_input)
+        st.session_state.messages.append({"role": "assistant", "content": response})
         st.session_state.feedback_request = True
         st.rerun()
