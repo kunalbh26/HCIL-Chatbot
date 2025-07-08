@@ -9,7 +9,7 @@ import time
 # Page Configuration
 # -------------------------------
 st.set_page_config(
-    page_title="HCIL IT Assistant Chatbot",
+    page_title="🤖 HCIL IT Assistant Chatbot",
     page_icon="🤖",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -39,7 +39,6 @@ model = load_sentence_transformer()
 def get_bot_response(user_query, df, nn_model, model):
     greetings = ["hello", "hi", "hey", "good morning", "good afternoon", "good evening"]
     how_are_you = ["how are you", "how are you doing", "how's it going"]
-    farewells = ["bye", "end", "quit", "exit"]
 
     query_lower = user_query.lower().strip()
     # Greeting logic
@@ -47,8 +46,6 @@ def get_bot_response(user_query, df, nn_model, model):
         return "Hello! 👋 How can I assist you with IT today?"
     if any(phrase in query_lower for phrase in how_are_you):
         return "I'm just a bot, but I'm always ready to help you! 😊"
-
-    # Farewell logic handled in chat input block
 
     # Knowledge base logic
     query_embed = model.encode([user_query])
@@ -70,69 +67,56 @@ def reset_chat():
 # Session State Initialization
 # -------------------------------
 if 'knowledge_base_loaded' not in st.session_state:
-    st.session_state['knowledge_base_loaded'] = False
+    st.session_state.knowledge_base_loaded = False
 if 'messages' not in st.session_state:
     st.session_state.messages = []
 if 'feedback_request' not in st.session_state:
     st.session_state.feedback_request = False
 if 'sidebar_collapsed' not in st.session_state:
     st.session_state.sidebar_collapsed = False
+if 'uploaded_file' not in st.session_state:
+    st.session_state.uploaded_file = None
 
 # -------------------------------
-# Collapsible Sidebar
+# Sidebar
 # -------------------------------
-def sidebar_toggle():
+def toggle_sidebar():
     st.session_state.sidebar_collapsed = not st.session_state.sidebar_collapsed
 
 with st.sidebar:
     # Sidebar toggle button
     toggle_label = "⏪" if not st.session_state.sidebar_collapsed else "⏩"
-    st.button(toggle_label, key="sidebar_toggle", on_click=sidebar_toggle)
+    st.button(toggle_label, on_click=toggle_sidebar, key="sidebar_toggle")
+
     # HCIL branding
     st.markdown(
         '<div class="sidebar-title">HCIL</div>',
         unsafe_allow_html=True
     )
+
     if not st.session_state.sidebar_collapsed:
-        with st.expander("📂 Upload Knowledge Base", expanded=True):
-            uploaded_file = st.file_uploader(
-                "Upload an Excel File",
-                type=["xlsx"],
-                help="Upload an Excel file with 'questions' and 'answers' columns."
-            )
-        st.caption("Built with ❤️ for HCIL")
-    else:
-        st.write("")  # Minimal sidebar when collapsed
-
-# -------------------------------
-# Load Knowledge Base
-# -------------------------------
-if 'uploaded_file' not in st.session_state:
-    st.session_state.uploaded_file = None
-
-if 'uploaded_file' in st.session_state and st.session_state.uploaded_file is not None:
-    uploaded_file = st.session_state.uploaded_file
-else:
-    uploaded_file = st.session_state.get('uploaded_file', None)
-
-if not st.session_state.sidebar_collapsed:
-    if uploaded_file is None:
-        uploaded_file = st.sidebar.file_uploader(
-            "Upload an Excel File",
+        # Single file uploader, shown only when sidebar is expanded
+        uploaded_file = st.file_uploader(
+            "Upload Knowledge Base",
             type=["xlsx"],
-            key="main_file_uploader",
             help="Upload an Excel file with 'questions' and 'answers' columns."
         )
         if uploaded_file:
             st.session_state.uploaded_file = uploaded_file
 
-if uploaded_file is not None and not st.session_state.knowledge_base_loaded:
+        st.caption("Built with ❤️ for HCIL")
+
+# -------------------------------
+# Load Knowledge Base (triggered by file upload)
+# -------------------------------
+if st.session_state.uploaded_file is not None and not st.session_state.knowledge_base_loaded:
     with st.spinner("🚀 Initializing bot..."):
         try:
-            df = pd.read_excel(uploaded_file)
+            df = pd.read_excel(st.session_state.uploaded_file)
             required_columns = {'questions', 'answers'}
             if not required_columns.issubset(df.columns):
-                st.error("❌ Error: Missing required columns in Excel file. Please ensure 'questions' and 'answers' columns exist.")
+                st.error("❌ Error: Missing required columns. Please ensure 'questions' and 'answers' columns exist.")
+                st.session_state.uploaded_file = None # Reset on error
             else:
                 st.session_state.df = df
                 embeddings = model.encode(df['questions'].tolist())
@@ -146,6 +130,8 @@ if uploaded_file is not None and not st.session_state.knowledge_base_loaded:
                 st.rerun()
         except Exception as e:
             st.error(f"❌ An error occurred while processing the file: {e}")
+            st.session_state.knowledge_base_loaded = False
+            st.session_state.uploaded_file = None
 
 # -------------------------------
 # Main Chat Interface
@@ -210,22 +196,25 @@ else:
                     st.session_state.feedback_request = False
                     st.rerun()
 
-        # Chat Input
-        prompt = st.chat_input("Ask me an IT question...")
-        if prompt:
-            st.session_state.messages.append({"role": "user", "content": prompt})
-            prompt_lower = prompt.lower().strip()
-            if prompt_lower in ["bye", "end", "quit", "exit"]:
-                st.session_state.messages.append({
-                    "role": "assistant",
-                    "content": "Thank you for chatting, <b>Mata ne!</b> (see you later) 👋"
-                })
-                st.session_state.feedback_request = False
-                time.sleep(1)
-                reset_chat()
-                st.rerun()
-            else:
-                bot_response = get_bot_response(prompt, st.session_state.df, st.session_state.nn_model, model)
-                st.session_state.messages.append({"role": "assistant", "content": bot_response})
-                st.session_state.feedback_request = True
-                st.rerun()
+    # Chat Input
+    prompt = st.chat_input("Ask me an IT question...")
+    if prompt:
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        prompt_lower = prompt.lower().strip()
+        if prompt_lower in ["bye", "end", "quit", "exit"]:
+            st.session_state.messages.append({
+                "role": "assistant",
+                "content": "Thank you for chatting, <b>Mata ne!</b> (see you later) 👋"
+            })
+            st.session_state.feedback_request = False
+            time.sleep(1) # Give user a moment to see the message
+            # Clear state for a new session but keep the knowledge base
+            reset_chat()
+            st.session_state.knowledge_base_loaded = False
+            st.session_state.uploaded_file = None
+            st.rerun()
+        else:
+            bot_response = get_bot_response(prompt, st.session_state.df, st.session_state.nn_model, model)
+            st.session_state.messages.append({"role": "assistant", "content": bot_response})
+            st.session_state.feedback_request = True # Ask for feedback after a real answer
+            st.rerun()
