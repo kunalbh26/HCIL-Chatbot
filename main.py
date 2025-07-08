@@ -89,23 +89,24 @@ def handle_greetings_and_farewells(prompt):
 # -------------------------------
 # Sidebar Configuration & Logic
 # -------------------------------
-with st.sidebar:
-    # Toggle button for sidebar
-    if st.button("Toggle Sidebar", key="sidebar_toggle"):
-        st.session_state.sidebar_state = 'collapsed' if st.session_state.sidebar_state == 'expanded' else 'expanded'
+# ** FIX: Initialize uploaded_file to None to prevent NameError **
+uploaded_file = None 
 
-    # Conditional display based on sidebar state
-    if st.session_state.sidebar_state == 'expanded':
-        st.markdown("<div class='sidebar-title'>HCIL</div>", unsafe_allow_html=True)
-        st.header("⚙️ Bot Configuration")
-        
-        with st.expander("📂 Upload Knowledge Base", expanded=True):
-            uploaded_file = st.file_uploader(
-                "Upload your Excel File",
-                type=["xlsx"],
-                help="Upload an Excel file with 'questions' and 'answers' columns."
-            )
-        st.caption("Built with ❤️ for HCIL")
+with st.sidebar:
+    # Toggle button for sidebar is removed as Streamlit handles it.
+    # The sidebar can be closed by the user with the 'X' button.
+    
+    st.markdown("<div class='sidebar-title'>HCIL</div>", unsafe_allow_html=True)
+    st.header("⚙️ Bot Configuration")
+    
+    with st.expander("📂 Upload Knowledge Base", expanded=True):
+        uploaded_file = st.file_uploader(
+            "Upload your Excel File",
+            type=["xlsx"],
+            help="Upload an Excel file with 'questions' and 'answers' columns."
+        )
+    st.caption("Built with ❤️ for HCIL")
+
 
 # -------------------------------
 # Load Knowledge Base
