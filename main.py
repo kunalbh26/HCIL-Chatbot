@@ -24,7 +24,6 @@ def load_css(file_name):
     with open(file_name) as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-# Inject custom CSS
 load_css("style.css")
 
 # -------------------------------
@@ -38,76 +37,84 @@ def load_sentence_transformer():
 model = load_sentence_transformer()
 
 # -------------------------------
+# Session State Initialization
+# -------------------------------
+def init_session_state():
+    """Initializes all necessary session state variables."""
+    if 'knowledge_base_loaded' not in st.session_state:
+        st.session_state.knowledge_base_loaded = False
+    if 'messages' not in st.session_state:
+        st.session_state.messages = []
+    if 'sidebar_state' not in st.session_state:
+        st.session_state.sidebar_state = 'expanded'
+    if 'feedback_given' not in st.session_state:
+        st.session_state.feedback_given = True # Start with true to not show buttons initially
+
+init_session_state()
+
+# -------------------------------
 # Helper Functions
 # -------------------------------
 def get_bot_response(user_query, df, nn_model, model):
     """
     Finds the best response from the knowledge base for a given user query.
     """
-    query_embed = model.encode([user_query])
-    distances, indices = nn_model.kneighbors(query_embed)
-    best_idx = indices[0][0]
-    
-    # A simple threshold to see if the result is relevant enough
-    if distances[0][0] > 0.6: # This threshold may need tuning
-        return "I'm not sure I have information on that. Could you try rephrasing your question?"
+    with st.spinner("Thinking... 🤔"):
+        query_embed = model.encode([user_query])
+        distances, indices = nn_model.kneighbors(query_embed)
         
-    return df.iloc[best_idx]['answers']
+        # Adding a threshold for relevance
+        if distances[0][0] < 0.6: # Cosine distance threshold
+            best_idx = indices[0][0]
+            response = df.iloc[best_idx]['answers']
+        else:
+            response = "I'm sorry, I don't have an answer for that. Could you please try rephrasing your question?"
+        
+        time.sleep(1) # Simulate thinking
+    return response
 
-def get_farewell_message():
-    return "Thank you for chatting. Feel free to start a new conversation anytime! 👋"
-
-def handle_greetings(query):
-    """Handles common greetings and returns a specific response."""
-    greetings = {
-        "hello": "Hello! How can I assist you with your IT questions today?",
-        "hi": "Hi there! What can I help you with?",
-        "hey": "Hey! I'm here to help with your IT issues.",
-        "how are you": "I'm just a bot, but I'm running at full capacity! What can I do for you?"
-    }
-    # Use regex for flexible matching
-    for greeting, response in greetings.items():
-        if re.search(r'\b' + greeting + r'\b', query, re.IGNORECASE):
-            return response
+def handle_greetings_and_farewells(prompt):
+    """Handles common greetings and farewells for a more natural conversation."""
+    greetings = r"\b(hi|hello|hey|yo|how are you)\b"
+    farewells = r"\b(bye|quit|exit|end|goodbye)\b"
+    
+    if re.search(greetings, prompt, re.IGNORECASE):
+        return "Hello there! How can I assist you with your IT questions today?"
+    
+    if re.search(farewells, prompt, re.IGNORECASE):
+        return "Thank you for chatting. Have a great day! 👋"
+        
     return None
 
 # -------------------------------
-# Session State Initialization
-# -------------------------------
-if 'knowledge_base_loaded' not in st.session_state:
-    st.session_state.knowledge_base_loaded = False
-if 'messages' not in st.session_state:
-    st.session_state.messages = []
-if 'chat_ended' not in st.session_state:
-    st.session_state.chat_ended = False
-
-# -------------------------------
-# Sidebar Configuration
+# Sidebar Configuration & Logic
 # -------------------------------
 with st.sidebar:
-    st.image("https://i.imgur.com/vL5aF4i.png", width=80) # Using a white logo for dark bg
-    st.header("⚙️ Bot Configuration")
-    
-    with st.expander("📂 Upload Knowledge Base", expanded=True):
-        uploaded_file = st.file_uploader(
-            "Upload an Excel File",
-            type=["xlsx"],
-            help="Upload an Excel file with 'questions' and 'answers' columns."
-        )
+    # Toggle button for sidebar
+    if st.button("Toggle Sidebar", key="sidebar_toggle"):
+        st.session_state.sidebar_state = 'collapsed' if st.session_state.sidebar_state == 'expanded' else 'expanded'
 
-    if st.button("🔄 Reset Chat Session"):
-        for key in list(st.session_state.keys()):
-            if key not in ['knowledge_base_loaded', 'df', 'nn_model']: # Keep KB loaded
-                del st.session_state[key]
-        st.rerun()
-
-    st.caption("Built with ❤️ for HCIL")
+    # Conditional display based on sidebar state
+    if st.session_state.sidebar_state == 'expanded':
+        st.markdown("<div class='sidebar-title'>HCIL</div>", unsafe_allow_html=True)
+        st.header("⚙️ Bot Configuration")
+        
+        with st.expander("📂 Upload Knowledge Base", expanded=True):
+            uploaded_file = st.file_uploader(
+                "Upload your Excel File",
+                type=["xlsx"],
+                help="Upload an Excel file with 'questions' and 'answers' columns."
+            )
+        st.caption("Built with ❤️ for HCIL")
 
 # -------------------------------
 # Load Knowledge Base
 # -------------------------------
-if uploaded_file is not None and not st.session_state.knowledge_base_loaded:
-    with st.spinner("🚀 Initializing bot... This may take a moment."):
+if 'uploaded_file' not in st.session_state:
+    st.session_state.uploaded_file = None
+
+if uploaded_file is not None and uploaded_file != st.session_state.uploaded_file:
+    with st.spinner("🚀 Initializing bot... This might take a moment."):
         try:
             df = pd.read_excel(uploaded_file)
             required_columns = {'questions', 'answers'}
@@ -121,91 +128,80 @@ if uploaded_file is not None and not st.session_state.knowledge_base_loaded:
                 
                 st.session_state.nn_model = nn_model
                 st.session_state.knowledge_base_loaded = True
-                st.session_state.messages = [] # Clear messages on new KB
-                st.session_state.chat_ended = False
-
+                st.session_state.uploaded_file = uploaded_file
+                st.session_state.messages = [] # Reset chat on new file
+                
                 st.success("✅ Knowledge base loaded! The bot is ready.")
                 time.sleep(1.5)
                 st.rerun()
+
         except Exception as e:
             st.error(f"❌ An error occurred while processing the file: {e}")
-
-# --- Message rendering functions ---
-def render_bot_message(content):
-    st.markdown(f"""
-    <div class="message-container bot-message">
-        <div class="avatar-bot">🤖</div>
-        <div class="bubble">{content}</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-def render_user_message(content):
-    st.markdown(f"""
-    <div class="message-container user-message">
-        <div class="bubble">{content}</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-def render_typing_indicator():
-    st.markdown("""
-    <div class="message-container bot-message">
-        <div class="avatar-bot">🤖</div>
-        <div class="bubble typing-indicator">
-            <span></span><span></span><span></span>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
 
 # -------------------------------
 # Main Chat Interface
 # -------------------------------
 if not st.session_state.knowledge_base_loaded:
-    st.info("👋 Welcome! Please upload a knowledge base file in the sidebar to start.")
+    st.markdown("<div class='welcome-message'><h1>HCIL IT Assistant Chatbot</h1><p>Please upload a knowledge base file in the sidebar to begin.</p></div>", unsafe_allow_html=True)
 else:
-    # --- Chat Header ---
-    st.markdown('<div class="chat-header">HCIL IT Helpdesk</div>', unsafe_allow_html=True)
-    
-    # --- Chat Messages ---
-    message_container = st.container()
-    with message_container:
-        if not st.session_state.messages:
-            st.session_state.messages.append({"role": "assistant", "content": "Hi there! I'm your friendly IT Helpdesk bot. How can I assist you today?"})
+    # --- Chat Messages Display ---
+    if not st.session_state.messages:
+        st.session_state.messages.append({"role": "assistant", "content": "Hi there! I'm your friendly IT Helpdesk bot. How can I assist you today?"})
 
-        for message in st.session_state.messages:
-            if message["role"] == "assistant":
-                render_bot_message(message["content"])
-            else:
-                render_user_message(message["content"])
+    for i, message in enumerate(st.session_state.messages):
+        role = message["role"]
+        content = message["content"]
+        
+        # Apply different styling based on role
+        if role == "user":
+            st.markdown(f"""
+            <div class="message-container user-message">
+                <div class="bubble">{content}</div>
+            </div>
+            """, unsafe_allow_html=True)
+        else: # Assistant
+            st.markdown(f"""
+            <div class="message-container bot-message">
+                <div class="bubble">{content}</div>
+            </div>
+            """, unsafe_allow_html=True)
 
-    # --- Chat Input ---
-    # Disable input if chat has ended
-    if st.session_state.chat_ended:
-        st.info("This chat has ended. Please press 'Reset Chat Session' in the sidebar to start a new one.")
-    else:
-        if prompt := st.chat_input("Ask me an IT question..."):
-            st.session_state.messages.append({"role": "user", "content": prompt})
-            render_user_message(prompt) # Immediately show user message
-
-            farewells = ["bye", "end", "quit", "exit", "goodbye"]
-            cleaned_prompt = prompt.lower().strip()
-
-            # 1. Check for farewells
-            if any(farewell in cleaned_prompt for farewell in farewells):
-                farewell_message = get_farewell_message()
-                st.session_state.messages.append({"role": "assistant", "content": farewell_message})
-                st.session_state.chat_ended = True
-                st.rerun()
-
-            # 2. Check for greetings
-            elif (greeting_response := handle_greetings(cleaned_prompt)):
-                st.session_state.messages.append({"role": "assistant", "content": greeting_response})
-                st.rerun()
-            
-            # 3. Process with AI model
-            else:
-                with st.spinner("Thinking..."):
-                    render_typing_indicator()
-                    time.sleep(1.5) # Simulate thinking and network latency
-                    bot_response = get_bot_response(prompt, st.session_state.df, st.session_state.nn_model, model)
-                    st.session_state.messages.append({"role": "assistant", "content": bot_response})
+        # --- Feedback Buttons Logic ---
+        # Show feedback buttons only for the last assistant message and if no feedback was given yet.
+        is_last_message = (i == len(st.session_state.messages) - 1)
+        if role == "assistant" and is_last_message and not st.session_state.feedback_given:
+            feedback_cols = st.columns([1, 1, 5]) # Ratio for button sizes
+            with feedback_cols[0]:
+                if st.button("👍", help="This was helpful!", key=f"thumb_up_{i}"):
+                    st.session_state.messages.append({"role": "assistant", "content": "Great! I'm glad I could help. Feel free to ask another question."})
+                    st.session_state.feedback_given = True
                     st.rerun()
+            with feedback_cols[1]:
+                if st.button("👎", help="This was not helpful.", key=f"thumb_down_{i}"):
+                    st.session_state.messages.append({"role": "assistant", "content": "I'm sorry to hear that. Could you try rephrasing your question?"})
+                    st.session_state.feedback_given = True
+                    st.rerun()
+    
+    # --- Chat Input ---
+    if prompt := st.chat_input("Ask me an IT question..."):
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        st.session_state.feedback_given = True # Hide old feedback buttons
+        
+        # Check for greetings or farewells first
+        special_response = handle_greetings_and_farewells(prompt)
+        
+        if special_response:
+            st.session_state.messages.append({"role": "assistant", "content": special_response})
+            # If it's a farewell, reset the chat after a delay
+            if "Thank you" in special_response:
+                time.sleep(2)
+                # Reset the core session state to start fresh
+                st.session_state.messages = []
+                st.session_state.feedback_given = True
+        else:
+            # Get response from the AI model
+            bot_response = get_bot_response(prompt, st.session_state.df, st.session_state.nn_model, model)
+            st.session_state.messages.append({"role": "assistant", "content": bot_response})
+            st.session_state.feedback_given = False # Request feedback for this new response
+            
+        st.rerun()
