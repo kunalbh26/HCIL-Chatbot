@@ -9,7 +9,7 @@ import time
 # Page Configuration
 # -------------------------------
 st.set_page_config(
-    page_title="🤖 HCIL IT Assistant Chatbot",
+    page_title="HCIL IT Assistant Chatbot",
     page_icon="🤖",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -41,7 +41,6 @@ def get_bot_response(user_query, df, nn_model, model):
     how_are_you = ["how are you", "how are you doing", "how's it going"]
 
     query_lower = user_query.lower().strip()
-    # Greeting logic
     if any(greet in query_lower for greet in greetings):
         return "Hello! 👋 How can I assist you with IT today?"
     if any(phrase in query_lower for phrase in how_are_you):
@@ -52,8 +51,6 @@ def get_bot_response(user_query, df, nn_model, model):
     distances, indices = nn_model.kneighbors(query_embed)
     best_idx = indices[0][0]
     best_distance = distances[0][0]
-
-    # Threshold for unknown answers (tune as needed)
     if best_distance > 0.35:
         return "I'm not sure about that. Could you please rephrase your question?"
 
@@ -67,7 +64,7 @@ def reset_chat():
 # Session State Initialization
 # -------------------------------
 if 'knowledge_base_loaded' not in st.session_state:
-    st.session_state.knowledge_base_loaded = False
+    st.session_state['knowledge_base_loaded'] = False
 if 'messages' not in st.session_state:
     st.session_state.messages = []
 if 'feedback_request' not in st.session_state:
@@ -78,45 +75,38 @@ if 'uploaded_file' not in st.session_state:
     st.session_state.uploaded_file = None
 
 # -------------------------------
-# Sidebar
+# Collapsible Sidebar
 # -------------------------------
-def toggle_sidebar():
+def sidebar_toggle():
     st.session_state.sidebar_collapsed = not st.session_state.sidebar_collapsed
 
 with st.sidebar:
-    # Sidebar toggle button
     toggle_label = "⏪" if not st.session_state.sidebar_collapsed else "⏩"
-    st.button(toggle_label, on_click=toggle_sidebar, key="sidebar_toggle")
-
-    # HCIL branding
-    st.markdown(
-        '<div class="sidebar-title">HCIL</div>',
-        unsafe_allow_html=True
-    )
-
+    if st.button(toggle_label, key="sidebar_toggle", help="Expand/Collapse Sidebar"):
+        sidebar_toggle()
+    st.markdown('<div class="sidebar-title">HCIL</div>', unsafe_allow_html=True)
     if not st.session_state.sidebar_collapsed:
-        # Single file uploader, shown only when sidebar is expanded
         uploaded_file = st.file_uploader(
-            "Upload Knowledge Base",
+            "Upload an Excel File",
             type=["xlsx"],
-            help="Upload an Excel file with 'questions' and 'answers' columns."
+            help="Upload an Excel file with 'questions' and 'answers' columns.",
+            key="main_file_uploader"
         )
         if uploaded_file:
             st.session_state.uploaded_file = uploaded_file
-
         st.caption("Built with ❤️ for HCIL")
 
 # -------------------------------
-# Load Knowledge Base (triggered by file upload)
+# Load Knowledge Base
 # -------------------------------
-if st.session_state.uploaded_file is not None and not st.session_state.knowledge_base_loaded:
+uploaded_file = st.session_state.uploaded_file
+if uploaded_file is not None and not st.session_state.knowledge_base_loaded:
     with st.spinner("🚀 Initializing bot..."):
         try:
-            df = pd.read_excel(st.session_state.uploaded_file)
+            df = pd.read_excel(uploaded_file)
             required_columns = {'questions', 'answers'}
             if not required_columns.issubset(df.columns):
-                st.error("❌ Error: Missing required columns. Please ensure 'questions' and 'answers' columns exist.")
-                st.session_state.uploaded_file = None # Reset on error
+                st.error("❌ Error: Missing required columns in Excel file. Please ensure 'questions' and 'answers' columns exist.")
             else:
                 st.session_state.df = df
                 embeddings = model.encode(df['questions'].tolist())
@@ -130,8 +120,6 @@ if st.session_state.uploaded_file is not None and not st.session_state.knowledge
                 st.rerun()
         except Exception as e:
             st.error(f"❌ An error occurred while processing the file: {e}")
-            st.session_state.knowledge_base_loaded = False
-            st.session_state.uploaded_file = None
 
 # -------------------------------
 # Main Chat Interface
@@ -143,11 +131,15 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+# Responsive chat alignment based on sidebar state
+chat_alignment = "centered-chat" if st.session_state.sidebar_collapsed else "right-chat"
+
 if not st.session_state.knowledge_base_loaded:
     st.info("👋 Please upload a knowledge base file in the sidebar to start the chat.")
 else:
     chat_container = st.container()
     with chat_container:
+        st.markdown(f'<div class="{chat_alignment}">', unsafe_allow_html=True)
         if not st.session_state.messages:
             st.session_state.messages.append({
                 "role": "assistant",
@@ -161,6 +153,7 @@ else:
                 st.markdown(
                     f'''
                     <div class="message-container bot-message">
+                        <div class="avatar-bot">🤖</div>
                         <div class="bubble bot-bubble">{content}</div>
                     </div>
                     ''',
@@ -171,6 +164,7 @@ else:
                     f'''
                     <div class="message-container user-message">
                         <div class="bubble user-bubble">{content}</div>
+                        <div class="avatar-user">🧑</div>
                     </div>
                     ''',
                     unsafe_allow_html=True
@@ -196,25 +190,25 @@ else:
                     st.session_state.feedback_request = False
                     st.rerun()
 
-    # Chat Input
-    prompt = st.chat_input("Ask me an IT question...")
-    if prompt:
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        prompt_lower = prompt.lower().strip()
-        if prompt_lower in ["bye", "end", "quit", "exit"]:
-            st.session_state.messages.append({
-                "role": "assistant",
-                "content": "Thank you for chatting, <b>Mata ne!</b> (see you later) 👋"
-            })
-            st.session_state.feedback_request = False
-            time.sleep(1) # Give user a moment to see the message
-            # Clear state for a new session but keep the knowledge base
-            reset_chat()
-            st.session_state.knowledge_base_loaded = False
-            st.session_state.uploaded_file = None
-            st.rerun()
-        else:
-            bot_response = get_bot_response(prompt, st.session_state.df, st.session_state.nn_model, model)
-            st.session_state.messages.append({"role": "assistant", "content": bot_response})
-            st.session_state.feedback_request = True # Ask for feedback after a real answer
-            st.rerun()
+        # Chat Input
+        prompt = st.chat_input("Ask me an IT question...")
+        if prompt:
+            st.session_state.messages.append({"role": "user", "content": prompt})
+            prompt_lower = prompt.lower().strip()
+            if prompt_lower in ["bye", "end", "quit", "exit"]:
+                st.session_state.messages.append({
+                    "role": "assistant",
+                    "content": "Thank you for chatting, <b>Mata ne!</b> (see you later) 👋"
+                })
+                st.session_state.feedback_request = False
+                # Delay to allow user to see the farewell message
+                st.experimental_rerun = True
+                time.sleep(1.2)
+                reset_chat()
+                st.rerun()
+            else:
+                bot_response = get_bot_response(prompt, st.session_state.df, st.session_state.nn_model, model)
+                st.session_state.messages.append({"role": "assistant", "content": bot_response})
+                st.session_state.feedback_request = True
+                st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
