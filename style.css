@@ -1,124 +1,190 @@
-/* ===== DARK MODE BODY ===== */
-body {
-    font-family: 'Segoe UI', sans-serif;
-    background-color: #121212;
-    color: #ffffff;
+/* --- DARK THEME BASE --- */
+body, [data-testid="stAppViewContainer"] {
+    background: #181818 !important;
+    color: #fff !important;
+    font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
 }
 
-/* ===== STREAMLIT CONTAINERS ===== */
-[data-testid="stAppViewContainer"] {
-    background-color: #121212;
-}
-
-[data-testid="stHeader"], footer {
-    display: none;
-}
-
-[data-testid="stSidebar"] {
-    background-color: #1f1f1f;
-    border-right: 1px solid #333;
-}
-
-/* ===== SIDEBAR TITLE ===== */
-.sidebar-title {
-    font-size: 2.5rem;
+/* --- MAIN TITLE --- */
+.main-title {
+    font-size: 2.7rem;
+    font-weight: 800;
+    color: #fff;
     text-align: center;
-    font-weight: bold;
-    color: red;
-    margin: 1rem 0;
-}
-
-/* ===== CHAT HEADER ===== */
-.persistent-header {
-    text-align: center;
-    font-size: 1.7rem;
-    font-weight: bold;
-    color: #ffffff;
-    padding: 15px;
-    margin-bottom: 20px;
-    border-bottom: 1px solid #333;
+    letter-spacing: 2px;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+    text-shadow: 0 2px 16px #d32f2f88, 0 0px 4px #fff2;
     position: sticky;
     top: 0;
-    background-color: #121212;
     z-index: 999;
+    background: transparent;
 }
 
-/* ===== MESSAGES ===== */
+/* --- SIDEBAR --- */
+[data-testid="stSidebar"] {
+    background: #222 !important;
+    border-right: 2px solid #d32f2f;
+    min-width: 90px !important;
+    max-width: 350px !important;
+    transition: all 0.4s cubic-bezier(.4,2.2,.2,1);
+    box-shadow: 2px 0 10px #d32f2f22;
+    padding-top: 0 !important;
+}
+.sidebar-title {
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: #d32f2f;
+    text-align: center;
+    letter-spacing: 4px;
+    margin: 1.5rem 0 1rem 0;
+    line-height: 1.1;
+    padding: 0 0.2em;
+    user-select: none;
+}
+
+/* --- COLLAPSED SIDEBAR --- */
+[data-testid="stSidebar"][style*="width: 90px"] .sidebar-title {
+    font-size: 1.2rem;
+    margin: 0.5rem 0;
+}
+
+/* --- CHAT HEADER --- */
+.chat-header {
+    background: #232323;
+    padding: 10px 15px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #d32f2f;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+.avatar-header {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #d32f2f 60%, #ff5252 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+    margin-right: 15px;
+    box-shadow: 0 2px 8px #d32f2f55;
+}
+.header-info {
+    display: flex;
+    flex-direction: column;
+}
+.header-title {
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #fff;
+}
+.header-status {
+    font-size: 0.9rem;
+    color: #ff5252;
+}
+
+/* --- CHAT MESSAGES --- */
 .message-container {
     display: flex;
-    margin: 8px 16px;
-    animation: fadeIn 0.5s ease-in-out;
+    margin: 8px 10px;
+    animation: popIn 0.55s cubic-bezier(.4,2.2,.2,1);
 }
-
 .user-message {
     justify-content: flex-end;
 }
-
 .bot-message {
     justify-content: flex-start;
 }
-
 .bubble {
-    max-width: 70%;
-    padding: 12px 18px;
+    max-width: 75%;
+    padding: 13px 19px;
     border-radius: 20px;
-    line-height: 1.5;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    font-size: 1rem;
+    line-height: 1.6;
+    font-size: 1.1rem;
+    word-wrap: break-word;
+    box-shadow: 0 2px 18px #d32f2f22, 0 1px 2px #fff2;
+    border: 2px solid #d32f2f33;
+    margin-bottom: 2px;
+    transition: background 0.3s;
 }
-
-.user-message .bubble {
-    background-color: #ff4d4d;
+.user-bubble {
+    background: linear-gradient(135deg, #d32f2f 80%, #ff5252 100%);
     color: #fff;
     border-bottom-right-radius: 5px;
+    border-top-right-radius: 22px;
+    border-bottom-left-radius: 20px;
+    border-top-left-radius: 20px;
+    border: 2px solid #d32f2f;
+    font-weight: 500;
 }
-
-.bot-message .bubble {
-    background-color: #2a2a2a;
+.bot-bubble {
+    background: linear-gradient(135deg, #ff5252 80%, #d32f2f 100%);
     color: #fff;
     border-bottom-left-radius: 5px;
+    border-top-left-radius: 22px;
+    border-bottom-right-radius: 20px;
+    border-top-right-radius: 20px;
+    border: 2px solid #ff5252;
+    font-weight: 500;
 }
 
-/* ===== CHAT INPUT ===== */
+/* --- CHAT INPUT --- */
 [data-testid="stChatInput"] {
-    background-color: #1f1f1f;
-    border-top: 1px solid #333;
-    padding: 15px;
+    background: #232323 !important;
+    border-top: 1px solid #d32f2f;
+    padding: 18px 0 18px 0;
 }
-
 .stTextInput > div > div > input {
-    background-color: #2a2a2a;
-    color: white;
+    background: #181818 !important;
+    color: #fff !important;
     border-radius: 20px;
-    border: 1px solid #555;
-    padding: 12px 20px;
-}
-
-/* ===== FEEDBACK BUTTONS ===== */
-.stButton > button {
-    background-color: #2a2a2a;
-    border: 1px solid #555;
-    border-radius: 50%;
-    width: 45px;
-    height: 45px;
-    color: white;
+    border: 2px solid #d32f2f;
+    padding: 12px 18px;
     font-size: 1.1rem;
-    transition: all 0.2s ease-in-out;
+    outline: none;
+    transition: border 0.3s;
+}
+.stTextInput > div > div > input:focus {
+    border: 2px solid #ff5252;
 }
 
+/* --- FEEDBACK BUTTONS --- */
+.stButton > button {
+    background: #232323 !important;
+    border: 2px solid #d32f2f;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    color: #fff;
+    font-size: 1.6rem;
+    margin-right: 8px;
+    transition: all 0.25s cubic-bezier(.4,2.2,.2,1);
+    box-shadow: 0 2px 8px #d32f2f44;
+}
 .stButton > button:hover {
-    background-color: #ff4d4d;
-    transform: scale(1.1);
+    background: #d32f2f !important;
+    color: #fff;
+    border-color: #ff5252;
+    transform: scale(1.12) rotate(-8deg);
 }
 
-/* ===== FADE ANIMATION ===== */
-@keyframes fadeIn {
+/* --- ANIMATIONS --- */
+@keyframes popIn {
   from {
     opacity: 0;
-    transform: translateY(15px);
+    transform: scale(0.98) translateY(20px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: scale(1) translateY(0);
   }
+}
+
+/* --- Hide Streamlit's default header and footer --- */
+[data-testid="stHeader"], footer {
+    display: none !important;
 }
