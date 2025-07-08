@@ -1,11 +1,12 @@
 /* General Body and Font Styling */
 body {
     font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+    color: #EAEAEA;
 }
 
 /* Main Streamlit container adjustments */
 [data-testid="stAppViewContainer"] {
-    background-color: #D6DBD7; /* A neutral, clean background */
+    background-color: #1E1E1E; /* A deep, dark grey */
 }
 
 /* Hide Streamlit's default header and footer */
@@ -15,56 +16,33 @@ body {
 
 /* Sidebar styling */
 [data-testid="stSidebar"] {
-    background-color: #F0F2F5;
-    border-right: 1px solid #e0e0e0;
+    background-color: #191919;
+    border-right: 1px solid #333;
 }
+.st-emotion-cache-16txtl3 {
+    padding-top: 2rem;
+}
+
 
 /* --- CHAT HEADER --- */
 .chat-header {
-    background-color: #F0F2F5; /* Matches sidebar */
-    padding: 10px 15px;
-    display: flex;
-    align-items: center;
-    border-bottom: 1px solid #D1D7DB;
+    background-color: #191919;
+    color: #EAEAEA;
+    padding: 1rem;
+    text-align: center;
+    font-size: 1.25rem;
+    font-weight: 600;
     position: sticky;
     top: 0;
     z-index: 1000;
+    border-bottom: 1px solid #333;
 }
-
-.avatar-header {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background-color: #007BFF; /* A vibrant blue */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    color: white;
-    margin-right: 15px;
-}
-
-.header-info {
-    display: flex;
-    flex-direction: column;
-}
-
-.header-title {
-    font-weight: 600;
-    font-size: 1.1rem;
-    color: #111B21;
-}
-
-.header-status {
-    font-size: 0.8rem;
-    color: #54656F;
-}
-
 
 /* --- CHAT MESSAGES --- */
 .message-container {
     display: flex;
-    margin: 5px 10px;
+    align-items: flex-end; /* Align avatar with the bottom of the bubble */
+    margin: 15px 10px;
     animation: fadeIn 0.5s ease-in-out;
 }
 
@@ -76,65 +54,117 @@ body {
     justify-content: flex-start;
 }
 
+.avatar-bot {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #007ACC;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+    margin-right: 10px;
+}
+
 .bubble {
-    max-width: 75%;
-    padding: 10px 15px;
-    border-radius: 18px;
-    line-height: 1.5;
-    box-shadow: 0 1px 1px rgba(0,0,0,0.08);
+    max-width: 80%;
+    padding: 12px 18px;
+    border-radius: 20px;
+    line-height: 1.6;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     word-wrap: break-word;
 }
 
 .user-message .bubble {
-    background-color: #E7FFDB; /* A softer green */
-    color: #111B21;
+    background-color: #005A9E; /* A distinct, rich blue */
+    color: #FFFFFF;
     border-bottom-right-radius: 5px;
 }
 
 .bot-message .bubble {
-    background-color: #FFFFFF;
-    color: #111B21;
+    background-color: #333333; /* Dark grey bubble */
+    color: #EAEAEA;
     border-bottom-left-radius: 5px;
 }
 
 /* --- CHAT INPUT --- */
 [data-testid="stChatInput"] {
-    background-color: #F0F2F5;
-    border-top: 1px solid #D1D7DB;
-    padding: 15px;
+    background-color: #191919;
+    border-top: 1px solid #333;
 }
 
-.stTextInput > div > div > input {
-    background-color: #FFFFFF;
+.st-emotion-cache-1uj9f0x { /* Targets the input field container */
+    background-color: #333333;
     border-radius: 18px;
-    border: 1px solid #D4D4D4;
-    padding: 10px 15px;
+    border: 1px solid #555;
 }
 
-/* --- FEEDBACK BUTTONS --- */
-.stButton > button {
-    background-color: #FFFFFF;
-    border: 1px solid #D4D4D4;
+.st-emotion-cache-1uj9f0x:focus-within {
+     border-color: #007ACC;
+}
+
+.st-emotion-cache-1xarl3l { /* Targets the actual input text */
+    color: #EAEAEA;
+}
+
+/* --- TYPING INDICATOR --- */
+.typing-indicator span {
+    height: 8px;
+    width: 8px;
+    background-color: #999;
     border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    transition: all 0.2s ease;
+    display: inline-block;
+    margin: 0 2px;
+    animation: bounce 1.4s infinite ease-in-out both;
 }
 
-.stButton > button:hover {
-    background-color: #F0F2F5;
-    border-color: #B0B0B0;
-    transform: scale(1.1);
+.typing-indicator span:nth-of-type(1) { animation-delay: -0.32s; }
+.typing-indicator span:nth-of-type(2) { animation-delay: -0.16s; }
+
+@keyframes bounce {
+    0%, 80%, 100% { transform: scale(0); }
+    40% { transform: scale(1.0); }
 }
 
-/* --- ANIMATION --- */
+/* --- ANIMATIONS --- */
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(15px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* --- SCROLLBAR --- */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #1E1E1E;
+}
+::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #777;
+}
+
+/* Sidebar Button */
+.stButton > button {
+    background-color: #007ACC;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 15px;
+    width: 100%;
+    transition: all 0.2s ease;
+}
+.stButton > button:hover {
+    background-color: #005A9E;
+    transform: scale(1.02);
 }
