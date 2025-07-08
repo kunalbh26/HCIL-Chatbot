@@ -5,7 +5,7 @@ body, [data-testid="stAppViewContainer"] {
     font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
 }
 
-/* --- MAIN TITLE (FIXED FOR CENTERING) --- */
+/* --- MAIN TITLE --- */
 .main-title {
     font-size: 2.7rem;
     font-weight: 800;
@@ -15,7 +15,10 @@ body, [data-testid="stAppViewContainer"] {
     margin-top: 2rem;
     margin-bottom: 2rem;
     text-shadow: 0 2px 16px #d32f2f88, 0 0px 4px #fff2;
-    /* Removed sticky position to allow proper centering */
+    position: sticky;
+    top: 0;
+    z-index: 999;
+    background: transparent;
 }
 
 /* --- SIDEBAR --- */
@@ -46,17 +49,32 @@ body, [data-testid="stAppViewContainer"] {
     margin: 0.5rem 0;
 }
 
+/* --- CHAT ALIGNMENT --- */
+.centered-chat {
+    max-width: 600px;
+    margin: 0 auto;
+    transition: margin 0.5s cubic-bezier(.4,2.2,.2,1);
+}
+.right-chat {
+    max-width: 600px;
+    margin-left: 380px;
+    transition: margin 0.5s cubic-bezier(.4,2.2,.2,1);
+}
+
 /* --- CHAT MESSAGES --- */
 .message-container {
     display: flex;
+    align-items: flex-end;
     margin: 8px 10px;
     animation: popIn 0.55s cubic-bezier(.4,2.2,.2,1);
 }
 .user-message {
     justify-content: flex-end;
+    flex-direction: row;
 }
 .bot-message {
     justify-content: flex-start;
+    flex-direction: row;
 }
 .bubble {
     max-width: 75%;
@@ -65,38 +83,61 @@ body, [data-testid="stAppViewContainer"] {
     line-height: 1.6;
     font-size: 1.1rem;
     word-wrap: break-word;
-    box-shadow: 0 2px 18px #00000022, 0 1px 2px #fff2;
+    box-shadow: 0 2px 18px #d32f2f22, 0 1px 2px #fff2;
     margin-bottom: 2px;
     transition: background 0.3s;
+    border: 2px solid #d32f2f33;
+}
+.user-bubble {
+    background: linear-gradient(135deg, #d32f2f 80%, #ff5252 100%);
+    color: #fff;
+    border-bottom-right-radius: 5px;
+    border-top-right-radius: 22px;
+    border-bottom-left-radius: 20px;
+    border-top-left-radius: 20px;
+    border: 2px solid #d32f2f;
+    font-weight: 500;
+}
+.bot-bubble {
+    background: #fff;
+    color: #181818;
+    border-bottom-left-radius: 5px;
+    border-top-left-radius: 22px;
+    border-bottom-right-radius: 20px;
+    border-top-right-radius: 20px;
+    border: 2px solid #ff5252;
     font-weight: 500;
 }
 
-/* --- USER BUBBLE (RED) --- */
-.user-bubble {
-    background: #d32f2f;
-    color: #fff;
-    border-bottom-right-radius: 5px;
-    border-top-right-radius: 20px;
-    border-bottom-left-radius: 20px;
-    border-top-left-radius: 20px;
+/* --- CHAT AVATARS --- */
+.avatar-user, .avatar-bot {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    font-size: 1.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 10px;
+    background: #fff;
+    box-shadow: 0 2px 8px #d32f2f33;
 }
-
-/* --- BOT BUBBLE (WHITE) --- */
-.bot-bubble {
-    background: #ffffff;
-    color: #333333; /* Dark text for readability on white background */
-    border: 1px solid #e0e0e0;
-    border-bottom-left-radius: 5px;
-    border-top-left-radius: 20px;
-    border-bottom-right-radius: 20px;
-    border-top-right-radius: 20px;
+.avatar-user {
+    background: linear-gradient(135deg, #d32f2f 80%, #ff5252 100%);
+    color: #fff;
+    font-weight: 700;
+}
+.avatar-bot {
+    background: #fff;
+    color: #d32f2f;
+    font-weight: 700;
 }
 
 /* --- CHAT INPUT --- */
 [data-testid="stChatInput"] {
     background: #232323 !important;
     border-top: 1px solid #d32f2f;
-    padding: 18px 0;
+    padding: 18px 0 18px 0;
 }
 .stTextInput > div > div > input {
     background: #181818 !important;
