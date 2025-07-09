@@ -74,16 +74,16 @@ st.markdown("""
         margin-top: 1.5rem;
         display: flex;
         align-items: center;
-        padding: 0.3rem 0.2rem;
+        padding: 0.3rem 0.8rem;
     }
     .input-bar input {
-        background: transparent;
+        background: #ffffff;
         border: 2px solid #ff0000;
         color: #fff;
         width: 100%;
-        padding: 0.3rem 0.3rem;
+        padding: 0.7rem 0.8rem;
         outline: none;
-        font-size: 4rem;
+        font-size: 1rem;
     }
     .send-btn {
         background: linear-gradient(90deg, #e53935 0%, #b71c1c 100%);
