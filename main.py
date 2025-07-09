@@ -103,10 +103,6 @@ background: #fff;
 color: #e53935;
 border: 1.5px solid #ff00;
 }
-/* Ensure full width for better vertical alignment appearance */
-.stButton>button {
-    width: 100%;
-}
 .quick-reply {
 display: inline-block;
 background: #fff;
