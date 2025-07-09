@@ -121,7 +121,7 @@ font-weight: 500;
 transition: background 0.2s, color 0.2s;
 }
 .quick-reply:hover {
-background: #4c4c4c;
+background: #e53935;
 color: #fff;
 }
 .sidebar-title {
