@@ -417,7 +417,7 @@ if st.session_state.knowledge_base_loaded:
         if send_clicked and user_input.strip():
           user_input_clean = user_input.lower().strip()
 
-           if user_input_clean in ["bye", "end", "quit"]:
+        if user_input_clean in ["bye", "end", "quit"]:
               # Show user's message first
               st.session_state.messages.append({
                   "role": "user",
