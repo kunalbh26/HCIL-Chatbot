@@ -290,6 +290,17 @@ with st.sidebar:
 # Main Application Logic
 # -------------------------------
 
+# Place this at the very start of the main application logic
+if st.session_state.chat_reset_time:
+    if time.time() - st.session_state.chat_reset_time > 2:
+        st.session_state.messages = []
+        st.session_state.chat_ended = False
+        st.session_state.feedback_request = False
+        st.session_state.show_typing = False
+        st.session_state.chat_reset_time = None
+        st.experimental_rerun()
+
+
 st.markdown("<h1 style='color:white; text-align:center; margin-top: -10px;'>🤖 HCIL IT Helpdesk Chatbot</h1>", unsafe_allow_html=True)
 st.markdown('<div class="main">', unsafe_allow_html=True)
 # Initialize session state variables
@@ -402,38 +413,32 @@ if st.session_state.knowledge_base_loaded:
         with col2:
             send_clicked = st.form_submit_button("Send", use_container_width=True)
 
-        if send_clicked and user_input.strip():
-            # --- Start of Corrected Logic ---
+if send_clicked and user_input.strip():
+    user_input_clean = user_input.lower().strip()
 
-            # 1. Always append the user's message first to ensure it's displayed.
-            st.session_state.messages.append({
-                "role": "user",
-                "content": user_input
-            })
-
-            user_input_clean = user_input.lower().strip()
-
-            # 2. Check if the input is a goodbye command.
-            if user_input_clean in ["bye", "end", "quit"]:
-                # If it is, immediately append the bot's final message.
-                goodbye_response = get_greeting_response(user_input_clean)
-                st.session_state.messages.append({
-                    "role": "bot",
-                    "content": goodbye_response
-                })
-                
-                # Set the flags to prepare for the timed reset.
-                st.session_state.chat_ended = True
-                st.session_state.feedback_request = False
-                st.session_state.show_typing = False
-                st.session_state.chat_reset_time = time.time()
-                
-                # Rerun to display both the user's and bot's goodbye messages.
-                st.rerun()
-            else:
-                # If it's a normal message, trigger the standard response flow.
-                st.session_state.show_typing = True
-                st.rerun()
+    if user_input_clean in ["bye", "end", "quit"]:
+        # Show user's message first
+        st.session_state.messages.append({
+            "role": "user",
+            "content": user_input
+        })
+        # Then bot's reply
+        st.session_state.messages.append({
+            "role": "bot",
+            "content": "Thank you for chatting, <b><span style='font-size:1.2em;color:#ffff;'>Mata Ne!</span></b> (see you later) 👋"
+        })
+        st.session_state.chat_ended = True
+        st.session_state.feedback_request = False
+        st.session_state.show_typing = False
+        st.session_state.chat_reset_time = time.time()
+        st.rerun()
+    else:
+        st.session_state.messages.append({
+            "role": "user",
+            "content": user_input
+        })
+        st.session_state.show_typing = True
+        st.rerun()
             
             # --- End of Corrected Logic ---
 
@@ -457,17 +462,6 @@ if st.session_state.knowledge_base_loaded:
 
 else:
     st.info("⬆️ Please upload a knowledge base file in the sidebar to begin the chat.")
-
-# ✅ Automatically reset chat 2 seconds after goodbye
-if st.session_state.chat_reset_time:
-    if time.time() - st.session_state.chat_reset_time > 2:
-        # Reset everything to initial state
-        st.session_state.messages = []
-        st.session_state.chat_ended = False
-        st.session_state.feedback_request = False
-        st.session_state.show_typing = False
-        st.session_state.chat_reset_time = None
-        st.rerun()
 
 
 st.markdown('</div>', unsafe_allow_html=True)
