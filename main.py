@@ -202,7 +202,6 @@ else:
                 })
                 st.session_state.feedback_request = False
                 # Delay to allow user to see the farewell message
-                st.experimental_rerun = True
                 time.sleep(1.2)
                 reset_chat()
                 st.rerun()
