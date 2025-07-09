@@ -191,7 +191,7 @@ def is_gibberish(text):
 def is_greeting(text):
     greetings = [
         "hello", "hi", "hey", "greetings", "good morning", "good afternoon", "good evening",
-        "how are you", "what's up", "sup", "yo", "thank you", "thanks", "bye", "goodbye"
+        "how are you", "what's up", "sup", "thank you", "thanks", "bye", "goodbye"
     ]
     text = text.lower()
     for greet in greetings:
@@ -211,7 +211,6 @@ def get_greeting_response(greet):
         "how are you": "I'm just a bot, but I'm here to help you! 😊",
         "what's up": "I'm here to help with your IT queries!",
         "sup": "All good! How can I assist you?",
-        "yo": "Yo! How can I help?",
         "thank you": "You're welcome! Let me know if you have more questions.",
         "thanks": "You're welcome!",
         "bye": "Thank you for chatting, **Mata Ne!** (see you later) 👋",
