@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -103,6 +102,10 @@ display: flex; align-items: center; justify-content: center;
 background: #fff;
 color: #e53935;
 border: 1.5px solid #ff00;
+}
+/* Ensure full width for better vertical alignment appearance */
+.stButton>button {
+    width: 100%;
 }
 .quick-reply {
 display: inline-block;
@@ -289,7 +292,6 @@ with st.sidebar:
 # -------------------------------
 # Main Application Logic
 # -------------------------------
-
 # Initialize session state variables at the top
 if 'knowledge_base_loaded' not in st.session_state:
     st.session_state['knowledge_base_loaded'] = False
@@ -301,20 +303,8 @@ if 'feedback_request' not in st.session_state:
     st.session_state['feedback_request'] = False
 if 'quick_replies' not in st.session_state:
     st.session_state['quick_replies'] = ["Reset password", "VPN issues", "Software install"]
-if 'chat_reset_time' not in st.session_state:
-    st.session_state['chat_reset_time'] = None
 if 'show_typing' not in st.session_state:
     st.session_state['show_typing'] = False
-
-# Handle chat reset after a delay
-if st.session_state.chat_reset_time:
-    if time.time() - st.session_state.chat_reset_time > 2:
-        st.session_state.messages = []
-        st.session_state.chat_ended = False
-        st.session_state.feedback_request = False
-        st.session_state.show_typing = False
-        st.session_state.chat_reset_time = None
-        st.experimental_rerun()
 
 st.markdown("<h1 style='color:black; text-align:center; margin-top: -10px;'>🤖 HCIL IT Helpdesk Chatbot</h1>", unsafe_allow_html=True)
 st.markdown('<div class="main">', unsafe_allow_html=True)
@@ -353,14 +343,24 @@ if st.session_state.knowledge_base_loaded and not st.session_state.messages:
 if st.session_state.knowledge_base_loaded:
     render_chat(st.session_state.messages)
 
+    # *** FIX 1: CHAT RESET LOGIC ***
+    # If the chat has ended, wait 2 seconds, then reset the state and rerun.
+    if st.session_state.chat_ended:
+        time.sleep(2)
+        st.session_state.messages = []
+        st.session_state.chat_ended = False
+        st.session_state.feedback_request = False
+        st.session_state.show_typing = False
+        st.rerun()
+
     if st.session_state.get("show_typing", False):
         show_typing()
     
-    # Quick Reply Chips
+    # *** FIX 2: VERTICAL QUICK REPLIES ***
+    # Removed st.columns to stack buttons vertically.
     st.markdown('<div style="margin-bottom:1rem;">', unsafe_allow_html=True)
-    cols = st.columns(len(st.session_state.quick_replies))
-    for i, reply in enumerate(st.session_state.quick_replies):
-        if cols[i].button(reply, key=f"quick_{reply}"):
+    for reply in st.session_state.quick_replies:
+        if st.button(reply, key=f"quick_{reply}", use_container_width=True):
             st.session_state.messages.append({"role": "user", "content": reply})
             st.session_state.show_typing = True
             st.rerun()
@@ -399,16 +399,15 @@ if st.session_state.knowledge_base_loaded:
             if send_clicked and user_input.strip():
                 user_input_clean = user_input.lower().strip()
 
+                st.session_state.messages.append({"role": "user", "content": user_input})
+
                 if user_input_clean in ["bye", "end", "quit"]:
-                    st.session_state.messages.append({"role": "user", "content": user_input})
                     st.session_state.messages.append({"role": "bot", "content": "Thank you for chatting, <b><span style='font-size:1.2em;color:#ffff;'>Mata Ne!</span></b> (see you later) 👋"})
                     st.session_state.chat_ended = True
                     st.session_state.feedback_request = False
                     st.session_state.show_typing = False
-                    st.session_state.chat_reset_time = time.time()
                     st.rerun()
                 else:
-                    st.session_state.messages.append({"role": "user", "content": user_input})
                     st.session_state.show_typing = True
                     st.rerun()
 
@@ -423,7 +422,6 @@ if st.session_state.knowledge_base_loaded:
             st.session_state.feedback_request = True
             st.session_state.show_typing = False
             st.rerun()
-
 else:
     st.info("⬆️ Please upload a knowledge base file in the sidebar to begin the chat.")
 
