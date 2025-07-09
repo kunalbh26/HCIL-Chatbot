@@ -71,13 +71,13 @@ st.markdown("""
         background: #222;
         border-radius: 20px;
         box-shadow: 0 2px 8px rgba(229,57,53,0.12);
-        margin-top: 1.5rem;
+        margin-top: 0.5rem;
         display: flex;
         align-items: center;
         padding: 0.3rem 0.8rem;
     }
     .input-bar input {
-        background: #ffffff;
+        background: transparent;
         border: 2px solid #ff0000;
         color: #fff;
         width: 100%;
