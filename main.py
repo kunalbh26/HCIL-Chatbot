@@ -19,7 +19,7 @@ st.markdown("""
     .main {
     background: transparent;
     border-radius: 0px;
-    padding: 4rem !important;
+    padding: 3rem !important;
     max-width: 640px;
     margin: 2.5rem auto;
     }
@@ -117,7 +117,7 @@ st.markdown("""
         transition: background 0.2s, color 0.2s;
     }
     .quick-reply:hover {
-        background: #e53935;
+        background: #4c4c4c;
         color: #fff;
     }
     .sidebar-title {
