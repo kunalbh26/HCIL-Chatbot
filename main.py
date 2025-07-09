@@ -80,7 +80,7 @@ st.markdown("""
         background: transparent;
         border: 2px solid #ff0000;
         color: #fff;
-        width: 75%;
+        width: 100%;
         padding: 0.7rem 0.8rem;
         outline: none;
         font-size: 1rem;
