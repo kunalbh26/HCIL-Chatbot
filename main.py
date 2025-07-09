@@ -397,7 +397,7 @@ if st.session_state.knowledge_base_loaded:
 
 # Input Bar (smaller send button to right)
     with st.form("chat_input_form", clear_on_submit=True):
-        col1, col2 = st.columns([8, 1])
+        col1, col2 = st.columns([6, 1])
         with col1:
             user_input = st.text_input("", placeholder="Type here...", key="input_bar")
         with col2:
