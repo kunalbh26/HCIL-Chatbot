@@ -360,7 +360,7 @@ if st.session_state.knowledge_base_loaded:
     # Removed st.columns to stack buttons vertically.
     st.markdown('<div style="margin-bottom:3rem;">', unsafe_allow_html=True)
     for reply in st.session_state.quick_replies:
-        if st.button(reply, key=f"quick_{reply}", use_container_width=True):
+        if st.button(reply, key=f"quick_{reply}"):
             st.session_state.messages.append({"role": "user", "content": reply})
             st.session_state.show_typing = True
             st.rerun()
