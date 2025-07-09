@@ -427,19 +427,12 @@ if st.session_state.knowledge_base_loaded:
               st.session_state.messages.append({
                   "role": "bot",
                   "content": "Thank you for chatting, <b><span style='font-size:1.2em;color:#ffff;'>Mata Ne!</span></b> (see you later) 👋"
-               })
-               st.session_state.chat_ended = True
-               st.session_state.feedback_request = False
-               st.session_state.show_typing = False
-               st.session_state.chat_reset_time = time.time()
-               st.rerun()
-          else:
-               st.session_state.messages.append({
-                   "role": "user",
-                   "content": user_input
-               })
-               st.session_state.show_typing = True
-               st.rerun()
+              })
+              st.session_state.chat_ended = True
+              st.session_state.feedback_request = False
+              st.session_state.show_typing = False
+              st.session_state.chat_reset_time = time.time()
+              st.rerun()
             
             # --- End of Corrected Logic ---
 
