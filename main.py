@@ -290,20 +290,7 @@ with st.sidebar:
 # Main Application Logic
 # -------------------------------
 
-# Place this at the very start of the main application logic
-if st.session_state.chat_reset_time:
-    if time.time() - st.session_state.chat_reset_time > 2:
-        st.session_state.messages = []
-        st.session_state.chat_ended = False
-        st.session_state.feedback_request = False
-        st.session_state.show_typing = False
-        st.session_state.chat_reset_time = None
-        st.experimental_rerun()
-
-
-st.markdown("<h1 style='color:white; text-align:center; margin-top: -10px;'>🤖 HCIL IT Helpdesk Chatbot</h1>", unsafe_allow_html=True)
-st.markdown('<div class="main">', unsafe_allow_html=True)
-# Initialize session state variables
+# Initialize session state variables at the very top, before any usage
 if 'knowledge_base_loaded' not in st.session_state:
     st.session_state['knowledge_base_loaded'] = False
 if 'messages' not in st.session_state:
@@ -317,6 +304,20 @@ if 'quick_replies' not in st.session_state:
 if 'chat_reset_time' not in st.session_state:
     st.session_state['chat_reset_time'] = None
 
+
+# Place this at the very start of the main application logic
+if st.session_state.chat_reset_time:
+    if time.time() - st.session_state.chat_reset_time > 2:
+        st.session_state.messages = []
+        st.session_state.chat_ended = False
+        st.session_state.feedback_request = False
+        st.session_state.show_typing = False
+        st.session_state.chat_reset_time = None
+        st.experimental_rerun()
+
+
+st.markdown("<h1 style='color:white; text-align:center; margin-top: -10px;'>🤖 HCIL IT Helpdesk Chatbot</h1>", unsafe_allow_html=True)
+st.markdown('<div class="main">', unsafe_allow_html=True)
 
 # Handle knowledge base upload
 if uploaded_file is not None and not st.session_state.knowledge_base_loaded:
