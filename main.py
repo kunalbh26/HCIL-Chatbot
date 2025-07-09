@@ -16,14 +16,6 @@ st.markdown("""
     body {
         background: #111;
     }
-    .main {
-        background: #ffffff !important;
-        border-radius: 18px;
-        box-shadow: 0 8px 32px 0 rgba(255,0,0,0.07);
-        padding: 2rem !important;
-        max-width: 540px;
-        margin: 2.5rem auto;
-    }
     .chat-bubble {
         padding: 1rem 1.5rem;
         border-radius: 20px;
@@ -124,12 +116,12 @@ st.markdown("""
     .sidebar-title {
         font-size: 3.5rem;
         color: #ff0000;
-        font-weight: 1500;
+        font-weight: 900;
         text-align: center;
         margin: 0.5rem 0 1.5rem 0;
         letter-spacing: 0.05em;
         width: 100%;
-        line-height: 1.1;
+        line-height: 1.6;
     }
     @keyframes fadeInUp {
         from { opacity: 0; transform: translateY(20px);}
