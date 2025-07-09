@@ -19,7 +19,7 @@ background: #323232;
 .main {
 background: transparent;
 border-radius: 0px;
-padding: 3,5rem !important;
+padding: 3.5rem !important;
 max-width: 640px;
 margin: 2.5rem auto;
 }
