@@ -19,7 +19,7 @@ st.markdown("""
     .main {
     background: #ffffff;
     border-radius: 0px;
-    padding: 2rem !important;
+    padding: 4rem !important;
     max-width: 640px;
     margin: 2.5rem auto;
     }
