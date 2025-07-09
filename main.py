@@ -81,7 +81,7 @@ st.markdown("""
         border: 2px solid #ff0000;
         color: #fff;
         width: 100%;
-        padding: 0.3rem 0.8rem;
+        padding: 0.3rem 0.3rem;
         outline: none;
         font-size: 1rem;
     }
