@@ -414,32 +414,32 @@ if st.session_state.knowledge_base_loaded:
         with col2:
             send_clicked = st.form_submit_button("Send", use_container_width=True)
 
-if send_clicked and user_input.strip():
-    user_input_clean = user_input.lower().strip()
+        if send_clicked and user_input.strip():
+          user_input_clean = user_input.lower().strip()
 
-    if user_input_clean in ["bye", "end", "quit"]:
-        # Show user's message first
-        st.session_state.messages.append({
-            "role": "user",
-            "content": user_input
-        })
-        # Then bot's reply
-        st.session_state.messages.append({
-            "role": "bot",
-            "content": "Thank you for chatting, <b><span style='font-size:1.2em;color:#ffff;'>Mata Ne!</span></b> (see you later) 👋"
-        })
-        st.session_state.chat_ended = True
-        st.session_state.feedback_request = False
-        st.session_state.show_typing = False
-        st.session_state.chat_reset_time = time.time()
-        st.rerun()
-    else:
-        st.session_state.messages.append({
-            "role": "user",
-            "content": user_input
-        })
-        st.session_state.show_typing = True
-        st.rerun()
+           if user_input_clean in ["bye", "end", "quit"]:
+              # Show user's message first
+              st.session_state.messages.append({
+                  "role": "user",
+                  "content": user_input
+              })
+              # Then bot's reply
+              st.session_state.messages.append({
+                  "role": "bot",
+                  "content": "Thank you for chatting, <b><span style='font-size:1.2em;color:#ffff;'>Mata Ne!</span></b> (see you later) 👋"
+               })
+               st.session_state.chat_ended = True
+               st.session_state.feedback_request = False
+               st.session_state.show_typing = False
+               st.session_state.chat_reset_time = time.time()
+               st.rerun()
+           else:
+               st.session_state.messages.append({
+                   "role": "user",
+                   "content": user_input
+               })
+               st.session_state.show_typing = True
+               st.rerun()
             
             # --- End of Corrected Logic ---
 
