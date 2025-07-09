@@ -83,7 +83,7 @@ st.markdown("""
         width: 100%;
         padding: 0.3rem 0.3rem;
         outline: none;
-        font-size: 1rem;
+        font-size: 4rem;
     }
     .send-btn {
         background: linear-gradient(90deg, #e53935 0%, #b71c1c 100%);
