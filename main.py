@@ -17,8 +17,8 @@ st.markdown("""
         background: #393939;
     }
     .main {
-    background: transparent;
-    border-radius: 18px;
+    background: #ffffff;
+    border-radius: 20px;
     padding: 2rem !important;
     max-width: 640px;
     margin: 2.5rem auto;
