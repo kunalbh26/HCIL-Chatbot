@@ -20,7 +20,7 @@ st.markdown("""
     background: #393939 !important;
     border-radius: 18px;
     padding: 2rem !important;
-    max-width: 540px;
+    max-width: 640px;
     margin: 2.5rem auto;
     }
     .chat-bubble {
