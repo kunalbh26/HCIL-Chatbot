@@ -14,13 +14,12 @@ from fuzzywuzzy import process
 st.markdown("""
     <style>
     body {
-        background: #111;
+        background: #393939;
     }
     .main {
-    background: #111 !important;
-    border-radius: 18px;
-    box-shadow: 0 8px 32px 0 rgba(255,0,0,0.07);
-    padding: 2rem !important;
+    background: #393939 !important;
+    border-radius: 0px;
+    padding: 0rem !important;
     max-width: 540px;
     margin: 2.5rem auto;
     }
@@ -291,9 +290,9 @@ with st.sidebar:
 # -------------------------------
 # Main Application Logic
 # -------------------------------
-st.markdown('<div class="main">', unsafe_allow_html=True)
-st.markdown("<h1 style='color:white; text-align:center; margin-top: -10px;'>🤖 HCIL IT Helpdesk Chatbot</h1>", unsafe_allow_html=True)
 
+st.markdown("<h1 style='color:white; text-align:center; margin-top: -10px;'>🤖 HCIL IT Helpdesk Chatbot</h1>", unsafe_allow_html=True)
+st.markdown('<div class="main">', unsafe_allow_html=True)
 # Initialize session state variables
 if 'knowledge_base_loaded' not in st.session_state:
     st.session_state['knowledge_base_loaded'] = False
