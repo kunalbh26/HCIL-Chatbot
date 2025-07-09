@@ -17,7 +17,7 @@ st.markdown("""
         background: #111;
     }
     .main {
-        background: #181818 !important;
+        background: #ffffff !important;
         border-radius: 18px;
         box-shadow: 0 8px 32px 0 rgba(255,0,0,0.07);
         padding: 2rem !important;
@@ -124,11 +124,11 @@ st.markdown("""
     .sidebar-title {
         font-size: 3.5rem;
         color: #ff0000;
-        font-weight: 900;
+        font-weight: 1500;
         text-align: center;
         margin: 0.5rem 0 1.5rem 0;
         letter-spacing: 0.05em;
-        width: 50%;
+        width: 100%;
         line-height: 1.1;
     }
     @keyframes fadeInUp {
