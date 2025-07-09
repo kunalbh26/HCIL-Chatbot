@@ -123,7 +123,7 @@ st.markdown("""
     }
     .sidebar-title {
         font-size: 3.5rem;
-        color: #ff0000;
+        color: #ffffff;
         font-weight: 900;
         text-align: center;
         margin: 0.5rem 0 1.5rem 0;
