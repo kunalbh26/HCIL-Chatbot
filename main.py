@@ -74,7 +74,7 @@ st.markdown("""
         margin-top: 1.5rem;
         display: flex;
         align-items: center;
-        padding: 0.3rem 0.8rem;
+        padding: 0.3rem 0.2rem;
     }
     .input-bar input {
         background: transparent;
