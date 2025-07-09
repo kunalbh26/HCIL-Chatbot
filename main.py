@@ -306,7 +306,7 @@ if 'quick_replies' not in st.session_state:
 if 'show_typing' not in st.session_state:
     st.session_state['show_typing'] = False
 
-st.markdown("<h1 style='color:black; text-align:center; margin-top: -10px;'>🤖 HCIL IT Helpdesk Chatbot</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='color:white; text-align:center; margin-top: -15px;'>🤖 HCIL IT Helpdesk Chatbot</h1>", unsafe_allow_html=True)
 st.markdown('<div class="main">', unsafe_allow_html=True)
 
 # Handle knowledge base upload
