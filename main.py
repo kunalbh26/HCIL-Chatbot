@@ -4,20 +4,22 @@ import numpy as np
 from sentence_transformers import SentenceTransformer
 from sklearn.neighbors import NearestNeighbors
 import time
-from datetime import datetime
+import re
+from fuzzywuzzy import fuzz
+from fuzzywuzzy import process
 
 # -------------------------------
-# Custom CSS for Modern UI
+# Custom CSS for Red-Black-White Theme
 # -------------------------------
 st.markdown("""
     <style>
     body {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) fixed;
+        background: #111;
     }
     .main {
-        background: rgba(255,255,255,0.8) !important;
+        background: #181818 !important;
         border-radius: 18px;
-        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        box-shadow: 0 8px 32px 0 rgba(255,0,0,0.07);
         padding: 2rem !important;
         max-width: 540px;
         margin: 2.5rem auto;
@@ -25,67 +27,127 @@ st.markdown("""
     .chat-bubble {
         padding: 1rem 1.5rem;
         border-radius: 20px;
-        margin-bottom: 8px;
+        margin-bottom: 14px;
         max-width: 75%;
         animation: fadeInUp 0.3s;
         position: relative;
         word-break: break-word;
         font-size: 1.08rem;
+        display: flex;
+        align-items: center;
     }
     .user-bubble {
-        background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
-        color: #222;
+        background: #fff;
+        color: #111;
         align-self: flex-end;
         margin-left: auto;
         margin-right: 0;
+        border: 1.5px solid #e53935;
     }
     .bot-bubble {
-        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(90deg, #e53935 0%, #b71c1c 100%);
         color: #fff;
         align-self: flex-start;
         margin-right: auto;
         margin-left: 0;
+        border: 1.5px solid #fff;
     }
     .avatar {
-        width: 38px; height: 38px; border-radius: 50%; margin-right: 8px;
-        display: inline-block; vertical-align: middle;
+        width: 38px; height: 38px; border-radius: 50%; margin: 0 10px;
         background: #fff;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+        box-shadow: 0 2px 8px rgba(229,57,53,0.12);
         font-size: 1.7rem;
         text-align: center;
         line-height: 38px;
+        border: 2px solid #e53935;
+        display: flex; align-items: center; justify-content: center;
     }
-    .timestamp {
-        font-size: 0.78rem;
-        color: #888;
-        margin-top: 2px;
-        margin-bottom: 8px;
-        margin-left: 46px;
+    .user-row {
+        display: flex; flex-direction: row; align-items: flex-end; justify-content: flex-end;
+    }
+    .bot-row {
+        display: flex; flex-direction: row; align-items: flex-end; justify-content: flex-start;
     }
     .input-bar {
-        background: rgba(255,255,255,0.7);
+        background: #222;
         border-radius: 20px;
-        padding: 0.7rem 1.2rem;
-        box-shadow: 0 2px 8px rgba(31,38,135,0.07);
+        box-shadow: 0 2px 8px rgba(229,57,53,0.12);
         margin-top: 1.5rem;
+        display: flex;
+        align-items: center;
+        padding: 0.3rem 0.8rem;
+    }
+    .input-bar input {
+        background: transparent;
+        border: none;
+        color: #fff;
+        width: 100%;
+        padding: 0.7rem 0.8rem;
+        outline: none;
+        font-size: 1rem;
+    }
+    .send-btn {
+        background: linear-gradient(90deg, #e53935 0%, #b71c1c 100%);
+        color: #fff;
+        border: none;
+        border-radius: 50%;
+        width: 38px;
+        height: 38px;
+        font-size: 1.2rem;
+        cursor: pointer;
+        margin-left: 8px;
+        transition: background 0.2s;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .send-btn:hover {
+        background: #fff;
+        color: #e53935;
+        border: 1.5px solid #e53935;
     }
     .quick-reply {
         display: inline-block;
-        background: #e0e7ff;
-        color: #4f46e5;
+        background: #fff;
+        color: #e53935;
         border-radius: 18px;
         padding: 0.5rem 1.1rem;
         margin: 0.15rem;
         cursor: pointer;
         font-size: 0.98rem;
-        transition: background 0.2s;
+        border: 1.5px solid #e53935;
+        font-weight: 500;
+        transition: background 0.2s, color 0.2s;
     }
     .quick-reply:hover {
-        background: #c7d2fe;
+        background: #e53935;
+        color: #fff;
+    }
+    .sidebar-title {
+        font-size: 2.7rem;
+        color: #e53935;
+        font-weight: 900;
+        text-align: center;
+        margin: 0.5rem 0 1.5rem 0;
+        letter-spacing: 0.1em;
+        width: 100%;
+        line-height: 1.1;
     }
     @keyframes fadeInUp {
         from { opacity: 0; transform: translateY(20px);}
         to { opacity: 1; transform: translateY(0);}
+    }
+    .typing-indicator {
+        display: flex; align-items: center; margin-bottom: 1.1rem;
+    }
+    .typing-dots span {
+        height: 10px; width: 10px; margin: 0 2px;
+        background: #e53935; border-radius: 50%; display: inline-block;
+        animation: blink 1.2s infinite both;
+    }
+    .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes blink {
+        0%, 80%, 100% { opacity: 0.2; }
+        40% { opacity: 1; }
     }
     </style>
 """, unsafe_allow_html=True)
@@ -112,59 +174,112 @@ model = load_sentence_transformer()
 # -------------------------------
 # Helper Functions
 # -------------------------------
+def is_gibberish(text):
+    # Simple gibberish detection: very short, mostly non-words, or non-ASCII, or repeated chars
+    text = text.strip()
+    if len(text) < 2:
+        return True
+    if re.fullmatch(r'[^\w\s]+', text):
+        return True
+    if len(set(text)) < 3:
+        return True
+    # If more than 50% of words are not alphabetic, likely gibberish
+    words = text.split()
+    if len(words) > 0 and sum(1 for w in words if not w.isalpha())/len(words) > 0.5:
+        return True
+    return False
+
+def is_greeting(text):
+    greetings = [
+        "hello", "hi", "hey", "greetings", "good morning", "good afternoon", "good evening",
+        "how are you", "what's up", "sup", "yo", "thank you", "thanks", "bye", "goodbye"
+    ]
+    text = text.lower()
+    for greet in greetings:
+        if fuzz.partial_ratio(greet, text) > 80:
+            return greet
+    return None
+
+def get_greeting_response(greet):
+    responses = {
+        "hello": "Hello! 👋 How can I help you today?",
+        "hi": "Hi there! How can I assist you?",
+        "hey": "Hey! How can I help you?",
+        "greetings": "Greetings! How can I help you?",
+        "good morning": "Good morning! ☀️ How can I help?",
+        "good afternoon": "Good afternoon! How can I help?",
+        "good evening": "Good evening! How can I help?",
+        "how are you": "I'm just a bot, but I'm here to help you! 😊",
+        "what's up": "I'm here to help with your IT queries!",
+        "sup": "All good! How can I assist you?",
+        "yo": "Yo! How can I help?",
+        "thank you": "You're welcome! Let me know if you have more questions.",
+        "thanks": "You're welcome!",
+        "bye": "Thank you for chatting, **Mata Ne!** (see you later) 👋",
+        "goodbye": "Thank you for chatting, **Mata Ne!** (see you later) 👋"
+    }
+    return responses.get(greet, "Hello! How can I help you?")
+
 def get_bot_response(user_query, df, nn_model, model):
+    # If gibberish, ask to rephrase
+    if is_gibberish(user_query):
+        return "I'm sorry, I couldn't understand that. Could you please rephrase your question?"
+    # If greeting, respond accordingly
+    greet = is_greeting(user_query)
+    if greet:
+        return get_greeting_response(greet)
+    # Fuzzy match to questions for spelling/grammar errors
+    questions = df['questions'].tolist()
+    best_match, score = process.extractOne(user_query, questions, scorer=fuzz.token_sort_ratio)
+    if score > 70:
+        idx = questions.index(best_match)
+        return df.iloc[idx]['answers']
+    # Otherwise, use embedding similarity
     query_embed = model.encode([user_query])
     distances, indices = nn_model.kneighbors(query_embed)
     best_idx = indices[0][0]
+    # If similarity is poor, ask to rephrase
+    if distances[0][0] > 0.45:
+        return "I'm sorry, I couldn't understand that. Could you please rephrase your question?"
     response = df.iloc[best_idx]['answers']
     return response
 
-def show_typing():
-    st.markdown("""
-        <div style="display:flex; align-items:center;">
-            <div class="avatar">🤖</div>
-            <span class="bot-bubble">
-                <span class="typing">
-                    <span>.</span><span>.</span><span>.</span>
-                </span>
-            </span>
-        </div>
-        <style>
-        .typing span {
-            animation: blink 1s infinite;
-        }
-        .typing span:nth-child(2) { animation-delay: 0.2s; }
-        .typing span:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes blink {
-            0%, 80%, 100% { opacity: 0; }
-            40% { opacity: 1; }
-        }
-        </style>
-    """, unsafe_allow_html=True)
-
 def render_chat(messages):
     for message in messages:
-        avatar = "🧑" if message["role"] == "user" else "🤖"
-        bubble_class = "user-bubble" if message["role"] == "user" else "bot-bubble"
-        align = "flex-end" if message["role"] == "user" else "flex-start"
-        st.markdown(
-            f"""
-            <div style="display:flex; align-items:flex-end; justify-content:{align}; margin-bottom:0.2rem;">
-                <div class="avatar">{avatar}</div>
-                <div class="chat-bubble {bubble_class}">{message['content']}</div>
-            </div>
-            <div class="timestamp">{message['timestamp']}</div>
-            """, unsafe_allow_html=True
-        )
+        if message["role"] == "user":
+            st.markdown(
+                f"""
+                <div class="user-row">
+                    <div class="chat-bubble user-bubble">{message['content']}</div>
+                    <div class="avatar" style="margin-left:8px;">🧑‍💻</div>
+                </div>
+                """, unsafe_allow_html=True
+            )
+        else: # bot
+            st.markdown(
+                f"""
+                <div class="bot-row">
+                    <div class="avatar" style="margin-right:8px;">🤖</div>
+                    <div class="chat-bubble bot-bubble">{message['content']}</div>
+                </div>
+                """, unsafe_allow_html=True
+            )
 
-def get_time():
-    return datetime.now().strftime("%I:%M %p")
+def show_typing():
+    st.markdown("""
+        <div class="typing-indicator">
+            <div class="avatar" style="margin-right:8px;">🤖</div>
+            <div class="typing-dots">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
 
 # -------------------------------
 # Sidebar Configuration
 # -------------------------------
 with st.sidebar:
-    st.header("⚙️ Configuration")
+    st.markdown('<div class="sidebar-title">HCIL</div>', unsafe_allow_html=True)
     with st.expander("📂 Knowledge Base Setup", expanded=False):
         uploaded_file = st.file_uploader(
             "Upload knowledge base!",
@@ -172,18 +287,6 @@ with st.sidebar:
             help="Upload an Excel file with 'questions', 'answers', 'categories', and 'tags' columns."
         )
     st.info("Say 'bye', 'quit', or 'end' to close our chat.")
-    theme = st.radio("Theme", ["🌞 Light", "🌙 Dark"], horizontal=True)
-    if theme == "🌙 Dark":
-        st.markdown("""
-            <style>
-            body { background: linear-gradient(135deg, #232526 0%, #414345 100%) fixed; }
-            .main { background: rgba(30,30,30,0.95) !important; color: #fff; }
-            .user-bubble { background: linear-gradient(90deg, #f7971e 0%, #ffd200 100%); color: #222; }
-            .bot-bubble { background: linear-gradient(90deg, #232526 0%, #414345 100%); color: #fff; }
-            .quick-reply { background: #232526; color: #ffd200; }
-            .quick-reply:hover { background: #414345; }
-            </style>
-        """, unsafe_allow_html=True)
 
 # -------------------------------
 # Main Application Logic
@@ -230,13 +333,16 @@ if uploaded_file is not None and not st.session_state.knowledge_base_loaded:
 if not st.session_state.messages:
     st.session_state.messages.append({
         "role": "bot",
-        "content": "👋 **Konichiwa!** How can I help you today?",
-        "timestamp": get_time()
+        "content": "👋 <b><span style='font-size:1.2em;color:#e53935;'>Konichiwa!</span></b> How can I help you today?"
     })
 
 # Main chat interface logic
 if st.session_state.knowledge_base_loaded:
     render_chat(st.session_state.messages)
+
+    # Typing Animation (shows only if last message is from user and waiting for bot)
+    if st.session_state.get("show_typing", False):
+        show_typing()
 
     # Quick Reply Chips
     st.markdown('<div style="margin-bottom:1rem;">', unsafe_allow_html=True)
@@ -244,53 +350,13 @@ if st.session_state.knowledge_base_loaded:
         if st.button(reply, key=f"quick_{reply}"):
             st.session_state.messages.append({
                 "role": "user",
-                "content": reply,
-                "timestamp": get_time()
+                "content": reply
             })
-            show_typing()
-            bot_response = get_bot_response(reply, st.session_state.df, st.session_state.nn_model, model)
-            st.session_state.messages.append({
-                "role": "bot",
-                "content": bot_response,
-                "timestamp": get_time()
-            })
-            st.session_state.feedback_request = True
-            st.rerun()
+            st.session_state.show_typing = True
+            st.experimental_rerun()
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # Chat Input Bar
-    with st.form("chat_input_form", clear_on_submit=True):
-        user_input = st.text_input("", placeholder="Type your IT question...", key="input_bar")
-        submit = st.form_submit_button("Send", use_container_width=True)
-        if submit and user_input.strip():
-            st.session_state.messages.append({
-                "role": "user",
-                "content": user_input,
-                "timestamp": get_time()
-            })
-            if user_input.lower() in ["bye", "end", "quit"]:
-                st.session_state.messages.append({
-                    "role": "bot",
-                    "content": "Thank you for chatting, **Mata Ne!** (see you later) 👋",
-                    "timestamp": get_time()
-                })
-                st.session_state.chat_ended = True
-                st.session_state.feedback_request = False
-                time.sleep(1)
-                st.session_state.messages = []
-                st.rerun()
-            else:
-                show_typing()
-                bot_response = get_bot_response(user_input, st.session_state.df, st.session_state.nn_model, model)
-                st.session_state.messages.append({
-                    "role": "bot",
-                    "content": bot_response,
-                    "timestamp": get_time()
-                })
-                st.session_state.feedback_request = True
-                st.rerun()
-
-    # Feedback Reactions
+    # Feedback Reactions (above input bar)
     if st.session_state.feedback_request:
         st.markdown("#### Was this helpful?")
         col1, col2, col3, col4 = st.columns(4)
@@ -298,38 +364,84 @@ if st.session_state.knowledge_base_loaded:
             if st.button("👍", use_container_width=True):
                 st.session_state.messages.append({
                     "role": "bot",
-                    "content": "Great! Let me know if there is something else that I can help you with.",
-                    "timestamp": get_time()
+                    "content": "Great! Let me know if there is something else that I can help you with."
                 })
                 st.session_state.feedback_request = False
-                st.rerun()
+                st.experimental_rerun()
         with col2:
             if st.button("👎", use_container_width=True):
                 st.session_state.messages.append({
                     "role": "bot",
-                    "content": "I apologize. Could you please rephrase your question?",
-                    "timestamp": get_time()
+                    "content": "I apologize. Could you please rephrase your question?"
                 })
                 st.session_state.feedback_request = False
-                st.rerun()
+                st.experimental_rerun()
         with col3:
             if st.button("🤔", use_container_width=True):
                 st.session_state.messages.append({
                     "role": "bot",
-                    "content": "I'm here to help! Feel free to ask another question.",
-                    "timestamp": get_time()
+                    "content": "I'm here to help! Feel free to ask another question."
                 })
                 st.session_state.feedback_request = False
-                st.rerun()
+                st.experimental_rerun()
         with col4:
             if st.button("❤️", use_container_width=True):
                 st.session_state.messages.append({
                     "role": "bot",
-                    "content": "Thank you for your feedback! 😊",
-                    "timestamp": get_time()
+                    "content": "Thank you for your feedback! 😊"
                 })
                 st.session_state.feedback_request = False
-                st.rerun()
+                st.experimental_rerun()
+
+    # Input Bar (smaller send button to right)
+    with st.form("chat_input_form", clear_on_submit=True):
+        col1, col2 = st.columns([8,1])
+        with col1:
+            user_input = st.text_input("", placeholder="Type here...", key="input_bar")
+        with col2:
+            send_clicked = st.form_submit_button("➡️", use_container_width=True)
+        if send_clicked and user_input.strip():
+            # Handle exit commands
+            if user_input.lower().strip() in ["bye", "end", "quit"]:
+                st.session_state.messages.append({
+                    "role": "bot",
+                    "content": "Thank you for chatting, <b><span style='font-size:1.2em;color:#e53935;'>Mata Ne!</span></b> (see you later) 👋"
+
+                })
+                st.session_state.chat_ended = True
+                st.session_state.feedback_request = False
+                st.session_state.show_typing = False
+                st.experimental_rerun()
+                time.sleep(3)
+                st.session_state.messages = []
+                st.session_state.chat_ended = False
+                st.experimental_rerun()
+            else:
+                st.session_state.messages.append({
+                    "role": "user",
+                    "content": user_input
+                })
+                st.session_state.show_typing = True
+                st.experimental_rerun()
+
+    # Bot response logic (after user or quick reply)
+    if st.session_state.get("show_typing", False):
+        time.sleep(1.2)
+        user_message = None
+        for msg in reversed(st.session_state.messages):
+            if msg["role"] == "user":
+                user_message = msg["content"]
+                break
+        if user_message:
+            bot_response = get_bot_response(user_message, st.session_state.df, st.session_state.nn_model, model)
+            st.session_state.messages.append({
+                "role": "bot",
+                "content": bot_response
+            })
+            st.session_state.feedback_request = True
+            st.session_state.show_typing = False
+            st.experimental_rerun()
+
 else:
     st.info("⬆️ Please upload a knowledge base file in the sidebar to begin the chat.")
 
