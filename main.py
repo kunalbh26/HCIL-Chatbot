@@ -4,28 +4,104 @@ import numpy as np
 from sentence_transformers import SentenceTransformer
 from sklearn.neighbors import NearestNeighbors
 import time
+from datetime import datetime
+
+# -------------------------------
+# Custom CSS for Modern UI
+# -------------------------------
+st.markdown("""
+    <style>
+    body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) fixed;
+    }
+    .main {
+        background: rgba(255,255,255,0.8) !important;
+        border-radius: 18px;
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        padding: 2rem !important;
+        max-width: 540px;
+        margin: 2.5rem auto;
+    }
+    .chat-bubble {
+        padding: 1rem 1.5rem;
+        border-radius: 20px;
+        margin-bottom: 8px;
+        max-width: 75%;
+        animation: fadeInUp 0.3s;
+        position: relative;
+        word-break: break-word;
+        font-size: 1.08rem;
+    }
+    .user-bubble {
+        background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
+        color: #222;
+        align-self: flex-end;
+        margin-left: auto;
+        margin-right: 0;
+    }
+    .bot-bubble {
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+        align-self: flex-start;
+        margin-right: auto;
+        margin-left: 0;
+    }
+    .avatar {
+        width: 38px; height: 38px; border-radius: 50%; margin-right: 8px;
+        display: inline-block; vertical-align: middle;
+        background: #fff;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+        font-size: 1.7rem;
+        text-align: center;
+        line-height: 38px;
+    }
+    .timestamp {
+        font-size: 0.78rem;
+        color: #888;
+        margin-top: 2px;
+        margin-bottom: 8px;
+        margin-left: 46px;
+    }
+    .input-bar {
+        background: rgba(255,255,255,0.7);
+        border-radius: 20px;
+        padding: 0.7rem 1.2rem;
+        box-shadow: 0 2px 8px rgba(31,38,135,0.07);
+        margin-top: 1.5rem;
+    }
+    .quick-reply {
+        display: inline-block;
+        background: #e0e7ff;
+        color: #4f46e5;
+        border-radius: 18px;
+        padding: 0.5rem 1.1rem;
+        margin: 0.15rem;
+        cursor: pointer;
+        font-size: 0.98rem;
+        transition: background 0.2s;
+    }
+    .quick-reply:hover {
+        background: #c7d2fe;
+    }
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px);}
+        to { opacity: 1; transform: translateY(0);}
+    }
+    </style>
+""", unsafe_allow_html=True)
 
 # -------------------------------
 # Page Configuration
 # -------------------------------
 st.set_page_config(
-    page_title="HCIL IT Assistant Chatbot",
+    page_title="HCIL IT Helpdesk Chat-Bot",
     page_icon="🤖",
-    layout="wide",
-    initial_sidebar_state="expanded",
+    layout="centered",
+    initial_sidebar_state="auto"
 )
 
 # -------------------------------
-# Custom CSS Loader
-# -------------------------------
-def load_css(file_name):
-    with open(file_name) as f:
-        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-
-load_css("style.css")
-
-# -------------------------------
-# Model Loader (Cached)
+# Model Loading (Cached)
 # -------------------------------
 @st.cache_resource
 def load_sentence_transformer():
@@ -37,177 +113,224 @@ model = load_sentence_transformer()
 # Helper Functions
 # -------------------------------
 def get_bot_response(user_query, df, nn_model, model):
-    greetings = ["hello", "hi", "hey", "good morning", "good afternoon", "good evening"]
-    how_are_you = ["how are you", "how are you doing", "how's it going"]
-
-    query_lower = user_query.lower().strip()
-    if any(greet in query_lower for greet in greetings):
-        return "Hello! 👋 How can I assist you with IT today?"
-    if any(phrase in query_lower for phrase in how_are_you):
-        return "I'm just a bot, but I'm always ready to help you! 😊"
-
-    # Knowledge base logic
     query_embed = model.encode([user_query])
     distances, indices = nn_model.kneighbors(query_embed)
     best_idx = indices[0][0]
-    best_distance = distances[0][0]
-    if best_distance > 0.35:
-        return "I'm not sure about that. Could you please rephrase your question?"
+    response = df.iloc[best_idx]['answers']
+    return response
 
-    return df.iloc[best_idx]['answers']
+def show_typing():
+    st.markdown("""
+        <div style="display:flex; align-items:center;">
+            <div class="avatar">🤖</div>
+            <span class="bot-bubble">
+                <span class="typing">
+                    <span>.</span><span>.</span><span>.</span>
+                </span>
+            </span>
+        </div>
+        <style>
+        .typing span {
+            animation: blink 1s infinite;
+        }
+        .typing span:nth-child(2) { animation-delay: 0.2s; }
+        .typing span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes blink {
+            0%, 80%, 100% { opacity: 0; }
+            40% { opacity: 1; }
+        }
+        </style>
+    """, unsafe_allow_html=True)
 
-def reset_chat():
-    st.session_state.messages = []
-    st.session_state.feedback_request = False
+def render_chat(messages):
+    for message in messages:
+        avatar = "🧑" if message["role"] == "user" else "🤖"
+        bubble_class = "user-bubble" if message["role"] == "user" else "bot-bubble"
+        align = "flex-end" if message["role"] == "user" else "flex-start"
+        st.markdown(
+            f"""
+            <div style="display:flex; align-items:flex-end; justify-content:{align}; margin-bottom:0.2rem;">
+                <div class="avatar">{avatar}</div>
+                <div class="chat-bubble {bubble_class}">{message['content']}</div>
+            </div>
+            <div class="timestamp">{message['timestamp']}</div>
+            """, unsafe_allow_html=True
+        )
+
+def get_time():
+    return datetime.now().strftime("%I:%M %p")
 
 # -------------------------------
-# Session State Initialization
+# Sidebar Configuration
 # -------------------------------
+with st.sidebar:
+    st.header("⚙️ Configuration")
+    with st.expander("📂 Knowledge Base Setup", expanded=False):
+        uploaded_file = st.file_uploader(
+            "Upload knowledge base!",
+            type=["xlsx"],
+            help="Upload an Excel file with 'questions', 'answers', 'categories', and 'tags' columns."
+        )
+    st.info("Say 'bye', 'quit', or 'end' to close our chat.")
+    theme = st.radio("Theme", ["🌞 Light", "🌙 Dark"], horizontal=True)
+    if theme == "🌙 Dark":
+        st.markdown("""
+            <style>
+            body { background: linear-gradient(135deg, #232526 0%, #414345 100%) fixed; }
+            .main { background: rgba(30,30,30,0.95) !important; color: #fff; }
+            .user-bubble { background: linear-gradient(90deg, #f7971e 0%, #ffd200 100%); color: #222; }
+            .bot-bubble { background: linear-gradient(90deg, #232526 0%, #414345 100%); color: #fff; }
+            .quick-reply { background: #232526; color: #ffd200; }
+            .quick-reply:hover { background: #414345; }
+            </style>
+        """, unsafe_allow_html=True)
+
+# -------------------------------
+# Main Application Logic
+# -------------------------------
+st.markdown('<div class="main">', unsafe_allow_html=True)
+st.title("🤖 HCIL IT Helpdesk Chatbot")
+
+# Initialize session state variables
 if 'knowledge_base_loaded' not in st.session_state:
     st.session_state['knowledge_base_loaded'] = False
 if 'messages' not in st.session_state:
-    st.session_state.messages = []
+    st.session_state['messages'] = []
+if 'chat_ended' not in st.session_state:
+    st.session_state['chat_ended'] = False
 if 'feedback_request' not in st.session_state:
-    st.session_state.feedback_request = False
-if 'sidebar_collapsed' not in st.session_state:
-    st.session_state.sidebar_collapsed = False
-if 'uploaded_file' not in st.session_state:
-    st.session_state.uploaded_file = None
+    st.session_state['feedback_request'] = False
+if 'quick_replies' not in st.session_state:
+    st.session_state['quick_replies'] = ["Reset password", "VPN issues", "Software install"]
 
-# -------------------------------
-# Collapsible Sidebar
-# -------------------------------
-def sidebar_toggle():
-    st.session_state.sidebar_collapsed = not st.session_state.sidebar_collapsed
-
-with st.sidebar:
-    toggle_label = "⏪" if not st.session_state.sidebar_collapsed else "⏩"
-    if st.button(toggle_label, key="sidebar_toggle", help="Expand/Collapse Sidebar"):
-        sidebar_toggle()
-    st.markdown('<div class="sidebar-title">HCIL</div>', unsafe_allow_html=True)
-    if not st.session_state.sidebar_collapsed:
-        uploaded_file = st.file_uploader(
-            "Upload an Excel File",
-            type=["xlsx"],
-            help="Upload an Excel file with 'questions' and 'answers' columns.",
-            key="main_file_uploader"
-        )
-        if uploaded_file:
-            st.session_state.uploaded_file = uploaded_file
-        st.caption("Built with ❤️ for HCIL")
-
-# -------------------------------
-# Load Knowledge Base
-# -------------------------------
-uploaded_file = st.session_state.uploaded_file
+# Handle knowledge base upload
 if uploaded_file is not None and not st.session_state.knowledge_base_loaded:
-    with st.spinner("🚀 Initializing bot..."):
+    with st.spinner("🚀 Launching the bot... Please wait."):
         try:
             df = pd.read_excel(uploaded_file)
-            required_columns = {'questions', 'answers'}
+            required_columns = {'questions', 'answers', 'categories', 'tags'}
             if not required_columns.issubset(df.columns):
-                st.error("❌ Error: Missing required columns in Excel file. Please ensure 'questions' and 'answers' columns exist.")
+                st.error("❌ **Error:** The file is missing required columns: `questions`, `answers`, `categories`, `tags`.")
             else:
                 st.session_state.df = df
                 embeddings = model.encode(df['questions'].tolist())
-                nn_model = NearestNeighbors(n_neighbors=1, metric='cosine', algorithm='brute')
+                nn_model = NearestNeighbors(n_neighbors=1, metric='cosine')
                 nn_model.fit(np.array(embeddings))
                 st.session_state.nn_model = nn_model
                 st.session_state.knowledge_base_loaded = True
-                reset_chat()
+                st.session_state.messages = []
+                st.session_state.chat_ended = False
                 st.success("✅ Knowledge base loaded! The bot is ready.")
                 time.sleep(1)
                 st.rerun()
         except Exception as e:
-            st.error(f"❌ An error occurred while processing the file: {e}")
+            st.error(f"❌ An error occurred: {e}")
 
-# -------------------------------
-# Main Chat Interface
-# -------------------------------
-st.markdown(
-    '''
-    <div class="main-title">HCIL IT Assistant Chatbot</div>
-    ''',
-    unsafe_allow_html=True
-)
+# Display initial greeting if chat hasn't started
+if not st.session_state.messages:
+    st.session_state.messages.append({
+        "role": "bot",
+        "content": "👋 **Konichiwa!** How can I help you today?",
+        "timestamp": get_time()
+    })
 
-# Responsive chat alignment based on sidebar state
-chat_alignment = "centered-chat" if st.session_state.sidebar_collapsed else "right-chat"
+# Main chat interface logic
+if st.session_state.knowledge_base_loaded:
+    render_chat(st.session_state.messages)
 
-if not st.session_state.knowledge_base_loaded:
-    st.info("👋 Please upload a knowledge base file in the sidebar to start the chat.")
-else:
-    chat_container = st.container()
-    with chat_container:
-        st.markdown(f'<div class="{chat_alignment}">', unsafe_allow_html=True)
-        if not st.session_state.messages:
+    # Quick Reply Chips
+    st.markdown('<div style="margin-bottom:1rem;">', unsafe_allow_html=True)
+    for reply in st.session_state.quick_replies:
+        if st.button(reply, key=f"quick_{reply}"):
             st.session_state.messages.append({
-                "role": "assistant",
-                "content": "Hi there! I'm your creative IT Assistant. How can I help you today?"
+                "role": "user",
+                "content": reply,
+                "timestamp": get_time()
             })
+            show_typing()
+            bot_response = get_bot_response(reply, st.session_state.df, st.session_state.nn_model, model)
+            st.session_state.messages.append({
+                "role": "bot",
+                "content": bot_response,
+                "timestamp": get_time()
+            })
+            st.session_state.feedback_request = True
+            st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
 
-        for message in st.session_state.messages:
-            role = message["role"]
-            content = message["content"]
-            if role == "assistant":
-                st.markdown(
-                    f'''
-                    <div class="message-container bot-message">
-                        <div class="avatar-bot">🤖</div>
-                        <div class="bubble bot-bubble">{content}</div>
-                    </div>
-                    ''',
-                    unsafe_allow_html=True
-                )
-            else:
-                st.markdown(
-                    f'''
-                    <div class="message-container user-message">
-                        <div class="bubble user-bubble">{content}</div>
-                        <div class="avatar-user">🧑</div>
-                    </div>
-                    ''',
-                    unsafe_allow_html=True
-                )
-
-        # Feedback Buttons
-        if st.session_state.get('feedback_request'):
-            col1, col2, _ = st.columns([1, 1, 5])
-            with col1:
-                if st.button("👍", key="thumbs_up", help="This was helpful!"):
-                    st.session_state.messages.append({
-                        "role": "assistant",
-                        "content": "Thank you! Please let me know if you have any other query or type 'bye' to end the conversation."
-                    })
-                    st.session_state.feedback_request = False
-                    st.rerun()
-            with col2:
-                if st.button("👎", key="thumbs_down", help="This was not helpful."):
-                    st.session_state.messages.append({
-                        "role": "assistant",
-                        "content": "I'm sorry! Please try rephrasing your question or ask something else."
-                    })
-                    st.session_state.feedback_request = False
-                    st.rerun()
-
-        # Chat Input
-        prompt = st.chat_input("Ask me an IT question...")
-        if prompt:
-            st.session_state.messages.append({"role": "user", "content": prompt})
-            prompt_lower = prompt.lower().strip()
-            if prompt_lower in ["bye", "end", "quit", "exit"]:
+    # Chat Input Bar
+    with st.form("chat_input_form", clear_on_submit=True):
+        user_input = st.text_input("", placeholder="Type your IT question...", key="input_bar")
+        submit = st.form_submit_button("Send", use_container_width=True)
+        if submit and user_input.strip():
+            st.session_state.messages.append({
+                "role": "user",
+                "content": user_input,
+                "timestamp": get_time()
+            })
+            if user_input.lower() in ["bye", "end", "quit"]:
                 st.session_state.messages.append({
-                    "role": "assistant",
-                    "content": "Thank you for chatting, <b>Mata ne!</b> (see you later) 👋"
+                    "role": "bot",
+                    "content": "Thank you for chatting, **Mata Ne!** (see you later) 👋",
+                    "timestamp": get_time()
                 })
+                st.session_state.chat_ended = True
                 st.session_state.feedback_request = False
-                # Delay to allow user to see the farewell message
-                time.sleep(1.2)
-                reset_chat()
+                time.sleep(1)
+                st.session_state.messages = []
                 st.rerun()
             else:
-                bot_response = get_bot_response(prompt, st.session_state.df, st.session_state.nn_model, model)
-                st.session_state.messages.append({"role": "assistant", "content": bot_response})
+                show_typing()
+                bot_response = get_bot_response(user_input, st.session_state.df, st.session_state.nn_model, model)
+                st.session_state.messages.append({
+                    "role": "bot",
+                    "content": bot_response,
+                    "timestamp": get_time()
+                })
                 st.session_state.feedback_request = True
                 st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
+
+    # Feedback Reactions
+    if st.session_state.feedback_request:
+        st.markdown("#### Was this helpful?")
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            if st.button("👍", use_container_width=True):
+                st.session_state.messages.append({
+                    "role": "bot",
+                    "content": "Great! Let me know if there is something else that I can help you with.",
+                    "timestamp": get_time()
+                })
+                st.session_state.feedback_request = False
+                st.rerun()
+        with col2:
+            if st.button("👎", use_container_width=True):
+                st.session_state.messages.append({
+                    "role": "bot",
+                    "content": "I apologize. Could you please rephrase your question?",
+                    "timestamp": get_time()
+                })
+                st.session_state.feedback_request = False
+                st.rerun()
+        with col3:
+            if st.button("🤔", use_container_width=True):
+                st.session_state.messages.append({
+                    "role": "bot",
+                    "content": "I'm here to help! Feel free to ask another question.",
+                    "timestamp": get_time()
+                })
+                st.session_state.feedback_request = False
+                st.rerun()
+        with col4:
+            if st.button("❤️", use_container_width=True):
+                st.session_state.messages.append({
+                    "role": "bot",
+                    "content": "Thank you for your feedback! 😊",
+                    "timestamp": get_time()
+                })
+                st.session_state.feedback_request = False
+                st.rerun()
+else:
+    st.info("⬆️ Please upload a knowledge base file in the sidebar to begin the chat.")
+
+st.markdown('</div>', unsafe_allow_html=True)
