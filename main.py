@@ -433,7 +433,7 @@ if st.session_state.knowledge_base_loaded:
                st.session_state.show_typing = False
                st.session_state.chat_reset_time = time.time()
                st.rerun()
-           else:
+          else:
                st.session_state.messages.append({
                    "role": "user",
                    "content": user_input
