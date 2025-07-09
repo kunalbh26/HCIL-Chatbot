@@ -123,12 +123,12 @@ st.markdown("""
     }
     .sidebar-title {
         font-size: 3.5rem;
-        color: #ffffff;
+        color: #ff0000;
         font-weight: 900;
         text-align: center;
         margin: 0.5rem 0 1.5rem 0;
         letter-spacing: 0.05em;
-        width: 100%;
+        width: 50%;
         line-height: 1.1;
     }
     @keyframes fadeInUp {
