@@ -53,13 +53,13 @@ st.markdown("""
         border: 1.5px solid #fff;
     }
     .avatar {
-        width: 38px; height: 38px; border-radius: 50%; margin: 0 10px;
-        background: #fff;
+        width: 38px; height: 38px; border-radius: 75%; margin: 0 10px;
+        background: #3d3d3d;
         box-shadow: 0 2px 8px rgba(229,57,53,0.12);
         font-size: 1.7rem;
         text-align: center;
         line-height: 38px;
-        border: 2px solid #e53935;
+        border: 2px solid #ff0000;
         display: flex; align-items: center; justify-content: center;
     }
     .user-row {
@@ -79,9 +79,9 @@ st.markdown("""
     }
     .input-bar input {
         background: transparent;
-        border: none;
+        border: 2px solid #ff0000;
         color: #fff;
-        width: 100%;
+        width: 75%;
         padding: 0.7rem 0.8rem;
         outline: none;
         font-size: 1rem;
@@ -102,7 +102,7 @@ st.markdown("""
     .send-btn:hover {
         background: #fff;
         color: #e53935;
-        border: 1.5px solid #e53935;
+        border: 1.5px solid #ff00;
     }
     .quick-reply {
         display: inline-block;
@@ -122,12 +122,12 @@ st.markdown("""
         color: #fff;
     }
     .sidebar-title {
-        font-size: 2.7rem;
-        color: #e53935;
+        font-size: 3.5rem;
+        color: #ff00;
         font-weight: 900;
         text-align: center;
         margin: 0.5rem 0 1.5rem 0;
-        letter-spacing: 0.1em;
+        letter-spacing: 0.05em;
         width: 100%;
         line-height: 1.1;
     }
@@ -140,7 +140,7 @@ st.markdown("""
     }
     .typing-dots span {
         height: 10px; width: 10px; margin: 0 2px;
-        background: #e53935; border-radius: 50%; display: inline-block;
+        background: #e53935; border-radius: 25%; display: inline-block;
         animation: blink 1.2s infinite both;
     }
     .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
@@ -333,7 +333,7 @@ if uploaded_file is not None and not st.session_state.knowledge_base_loaded:
 if not st.session_state.messages:
     st.session_state.messages.append({
         "role": "bot",
-        "content": "👋 <b><span style='font-size:1.2em;color:#e53935;'>Konichiwa!</span></b> How can I help you today?"
+        "content": "👋 <b><span style='font-size:1.2em;color:#ffff;'>Konichiwa!</span></b> How can I help you today?"
     })
 
 # Main chat interface logic
@@ -353,7 +353,7 @@ if st.session_state.knowledge_base_loaded:
                 "content": reply
             })
             st.session_state.show_typing = True
-            st.experimental_rerun()
+            st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)
 
     # Feedback Reactions (above input bar)
@@ -367,7 +367,7 @@ if st.session_state.knowledge_base_loaded:
                     "content": "Great! Let me know if there is something else that I can help you with."
                 })
                 st.session_state.feedback_request = False
-                st.experimental_rerun()
+                st.rerun()
         with col2:
             if st.button("👎", use_container_width=True):
                 st.session_state.messages.append({
@@ -375,7 +375,7 @@ if st.session_state.knowledge_base_loaded:
                     "content": "I apologize. Could you please rephrase your question?"
                 })
                 st.session_state.feedback_request = False
-                st.experimental_rerun()
+                st.rerun()
         with col3:
             if st.button("🤔", use_container_width=True):
                 st.session_state.messages.append({
@@ -383,7 +383,7 @@ if st.session_state.knowledge_base_loaded:
                     "content": "I'm here to help! Feel free to ask another question."
                 })
                 st.session_state.feedback_request = False
-                st.experimental_rerun()
+                st.rerun()
         with col4:
             if st.button("❤️", use_container_width=True):
                 st.session_state.messages.append({
@@ -391,7 +391,7 @@ if st.session_state.knowledge_base_loaded:
                     "content": "Thank you for your feedback! 😊"
                 })
                 st.session_state.feedback_request = False
-                st.experimental_rerun()
+                st.rerun()
 
     # Input Bar (smaller send button to right)
     with st.form("chat_input_form", clear_on_submit=True):
@@ -399,30 +399,30 @@ if st.session_state.knowledge_base_loaded:
         with col1:
             user_input = st.text_input("", placeholder="Type here...", key="input_bar")
         with col2:
-            send_clicked = st.form_submit_button("➡️", use_container_width=True)
+            send_clicked = st.form_submit_button("Send", use_container_width=True)
         if send_clicked and user_input.strip():
             # Handle exit commands
             if user_input.lower().strip() in ["bye", "end", "quit"]:
                 st.session_state.messages.append({
                     "role": "bot",
-                    "content": "Thank you for chatting, <b><span style='font-size:1.2em;color:#e53935;'>Mata Ne!</span></b> (see you later) 👋"
+                    "content": "Thank you for chatting, <b><span style='font-size:1.2em;color:#ffff;'>Mata Ne!</span></b> (see you later) 👋"
 
                 })
                 st.session_state.chat_ended = True
                 st.session_state.feedback_request = False
                 st.session_state.show_typing = False
-                st.experimental_rerun()
+                st.rerun()
                 time.sleep(3)
                 st.session_state.messages = []
                 st.session_state.chat_ended = False
-                st.experimental_rerun()
+                st.rerun()
             else:
                 st.session_state.messages.append({
                     "role": "user",
                     "content": user_input
                 })
                 st.session_state.show_typing = True
-                st.experimental_rerun()
+                st.rerun()
 
     # Bot response logic (after user or quick reply)
     if st.session_state.get("show_typing", False):
@@ -440,7 +440,7 @@ if st.session_state.knowledge_base_loaded:
             })
             st.session_state.feedback_request = True
             st.session_state.show_typing = False
-            st.experimental_rerun()
+            st.rerun()
 
 else:
     st.info("⬆️ Please upload a knowledge base file in the sidebar to begin the chat.")
