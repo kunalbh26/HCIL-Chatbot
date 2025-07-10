@@ -67,100 +67,33 @@ html, body, .stApp {{
     border: 3px solid #fff !important;
 }}
 
-/* FIXED: Floating Input Bar - ChatGPT/Gemini Style */
-.fixed-input-wrapper {{
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90%;
-    max-width: 600px;
-    z-index: 1000;
-    background: rgba(31, 31, 31, 0.95);
-    backdrop-filter: blur(10px);
-    border-radius: 25px;
-    padding: 15px;
-    border: 2px solid #e53935;
-    box-shadow: 0 4px 20px rgba(229, 57, 53, 0.3);
+.input-bar input {{
+background: #323232;
+border: 2px solid #ff0000;
+color: #fff;
+width: 100%;
+padding: 0.7rem 0.8rem;
+outline: none;
+font-size: 1rem;
 }}
 
-/* Style the input form within the fixed wrapper */
-.fixed-input-wrapper .stForm {{
-    margin: 0 !important;
+.send-btn {{
+background: linear-gradient(90deg, #e53935 0%, #b71c1c 100%);
+color: #fff;
+border: none;
+border-radius: 50%;
+width: 38px;
+height: 38px;
+font-size: 1.2rem;
+cursor: pointer;
+margin-left: 8px;
+transition: background 0.2s;
+display: flex; align-items: center; justify-content: center;
 }}
-
-.fixed-input-wrapper .stTextInput > div > div > input {{
-    background: #2a2a2a !important;
-    border: 2px solid #e53935 !important;
-    border-radius: 20px !important;
-    color: #fff !important;
-    padding: 12px 20px !important;
-    font-size: 16px !important;
-}}
-
-.fixed-input-wrapper .stTextInput > div > div > input:focus {{
-    border-color: #ff6b6b !important;
-    box-shadow: 0 0 0 2px rgba(229, 57, 53, 0.3) !important;
-}}
-
-/* Send button styling */
-.fixed-input-wrapper .stButton > button {{
-    background: linear-gradient(90deg, #e53935 0%, #b71c1c 100%) !important;
-    color: #fff !important;
-    border: none !important;
-    border-radius: 50% !important;
-    width: 45px !important;
-    height: 45px !important;
-    font-size: 18px !important;
-    min-width: 45px !important;
-    padding: 0 !important;
-    margin: 0 !important;
-}}
-
-.fixed-input-wrapper .stButton > button:hover {{
-    background: #fff !important;
-    color: #e53935 !important;
-    transform: scale(1.05) !important;
-}}
-
-/* FIXED: Feedback Buttons - Floating Above Input */
-.fixed-feedback-wrapper {{
-    position: fixed;
-    bottom: 100px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90%;
-    max-width: 600px;
-    z-index: 999;
-    background: rgba(31, 31, 31, 0.95);
-    backdrop-filter: blur(10px);
-    border-radius: 15px;
-    padding: 15px;
-    border: 1px solid #e53935;
-    box-shadow: 0 4px 15px rgba(229, 57, 53, 0.2);
-}}
-
-.fixed-feedback-wrapper h4 {{
-    color: white !important;
-    text-align: center !important;
-    margin-bottom: 1rem !important;
-    font-size: 1.1rem !important;
-}}
-
-.fixed-feedback-wrapper .stButton > button {{
-    background: rgba(229, 57, 53, 0.8) !important;
-    color: #fff !important;
-    border: 1px solid #fff !important;
-    border-radius: 10px !important;
-    padding: 8px 12px !important;
-    font-size: 1.2rem !important;
-    transition: all 0.2s !important;
-}}
-
-.fixed-feedback-wrapper .stButton > button:hover {{
-    background: #fff !important;
-    color: #e53935 !important;
-    transform: scale(1.1) !important;
+.send-btn:hover {{
+background: #fff;
+color: #e53935;
+border: 1.5px solid #ff00;
 }}
 
 /* Chat bubbles and avatars */
@@ -244,12 +177,12 @@ html, body, .stApp {{
     background: #e53935;
     color: #fff;
 }}
-
+/*
 .quick-reply-container {{
     margin-top: 1rem;
     margin-bottom: 2rem;
 }}
-
+*/
 /* Enhanced Sidebar Title */
 .sidebar-title {{
     font-size: 5.5rem;
