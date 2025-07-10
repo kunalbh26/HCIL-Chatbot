@@ -267,6 +267,7 @@ html, body, .stApp {{
 </style>
 """, unsafe_allow_html=True)
 
+
 # -------------------------------
 # Page Configuration
 # -------------------------------
@@ -293,20 +294,19 @@ def load_knowledge_base(path):
         df = pd.read_excel(path)
         required_columns = {'questions', 'answers', 'categories', 'tags'}
         if not required_columns.issubset(df.columns):
-            st.error(f"❌ **Error:** The knowledge base file '{path}' is missing required columns: `questions`, `answers`, `categories`, `tags`.")
+            st.error(f"❌ **Error:** Missing required columns: {required_columns}")
             st.stop()
         embeddings = model.encode(df['questions'].tolist())
         nn_model = NearestNeighbors(n_neighbors=1, metric='cosine')
         nn_model.fit(np.array(embeddings))
         return df, nn_model
     except FileNotFoundError:
-        st.error(f"❌ **Error:** Knowledge base file not found at '{path}'. Please ensure it's in the correct directory.")
+        st.error(f"❌ File not found at '{path}'")
         st.stop()
     except Exception as e:
-        st.error(f"❌ An error occurred while loading the knowledge base: {e}")
+        st.error(f"❌ Error loading KB: {e}")
         st.stop()
 
-# Load the knowledge base globally when the app starts
 if 'df' not in st.session_state or 'nn_model' not in st.session_state:
     st.session_state.df, st.session_state.nn_model = load_knowledge_base(KNOWLEDGE_BASE_PATH)
     st.session_state.knowledge_base_loaded = True
@@ -316,11 +316,7 @@ if 'df' not in st.session_state or 'nn_model' not in st.session_state:
 # -------------------------------
 def is_gibberish(text):
     text = text.strip()
-    if len(text) < 2:
-        return True
-    if re.fullmatch(r'[^\w\s]+', text):
-        return True
-    if len(set(text)) < 3:
+    if len(text) < 2 or re.fullmatch(r'[^\w\s]+', text) or len(set(text)) < 3:
         return True
     words = text.split()
     if len(words) > 0 and sum(1 for w in words if not w.isalpha()) / len(words) > 0.5:
@@ -379,75 +375,48 @@ def get_bot_response(user_query, df, nn_model, model):
     if distances[0][0] > 0.45:
         return "I'm sorry, I couldn't understand that. Could you please rephrase your question?"
 
-    response = df.iloc[best_idx]['answers']
-    return response
+    return df.iloc[best_idx]['answers']
 
 def render_chat(messages):
-    for message in messages:
-        if message["role"] == "user":
-            st.markdown(
-                f"""
-                <div class="user-row">
-                    <div class="chat-bubble user-bubble">{message['content']}</div>
-                    <div class="avatar" style="margin-left:8px;">🧑‍💻</div>
-                </div>
-                """, unsafe_allow_html=True
-            )
+    for msg in messages:
+        if msg["role"] == "user":
+            st.markdown(f"""<div class="user-row"><div class="chat-bubble user-bubble">{msg['content']}</div><div class="avatar">🧑‍💻</div></div>""", unsafe_allow_html=True)
         else:
-            st.markdown(
-                f"""
-                <div class="bot-row">
-                    <div class="avatar" style="margin-right:8px;">🤖</div>
-                    <div class="chat-bubble bot-bubble">{message['content']}</div>
-                </div>
-                """, unsafe_allow_html=True
-            )
+            st.markdown(f"""<div class="bot-row"><div class="avatar">🤖</div><div class="chat-bubble bot-bubble">{msg['content']}</div></div>""", unsafe_allow_html=True)
 
 def show_typing():
-    st.markdown("""
-    <div class="typing-indicator">
-        <div class="avatar" style="margin-right:8px;">🤖</div>
-        <div class="typing-dots">
-            <span></span><span></span><span></span>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown("""<div class="typing-indicator"><div class="avatar">🤖</div><div class="typing-dots"><span></span><span></span><span></span></div></div>""", unsafe_allow_html=True)
 
 # -------------------------------
 # Sidebar Configuration
 # -------------------------------
 with st.sidebar:
     st.markdown('<div class="sidebar-title">HCIL</div>', unsafe_allow_html=True)
-    st.info("Say 'bye', 'quit', or 'end' to close our chat.")
+    st.info("Say 'bye', 'quit', or 'end' to close the chat.")
 
 # -------------------------------
-# Main Application Logic
+# Session State Initialization
 # -------------------------------
-# Initialize session state variables
-if 'knowledge_base_loaded' not in st.session_state:
-    st.session_state['knowledge_base_loaded'] = False
-if 'messages' not in st.session_state:
-    st.session_state['messages'] = []
-if 'chat_ended' not in st.session_state:
-    st.session_state['chat_ended'] = False
-if 'feedback_request' not in st.session_state:
-    st.session_state['feedback_request'] = False
-if 'quick_replies' not in st.session_state:
-    st.session_state['quick_replies'] = ["Reset password", "VPN issues", "Software install"]
-if 'show_typing' not in st.session_state:
-    st.session_state['show_typing'] = False
-if 'chat_started' not in st.session_state:
-    st.session_state['chat_started'] = False
-if 'show_quick_replies' not in st.session_state:
-    st.session_state['show_quick_replies'] = False
+defaults = {
+    'knowledge_base_loaded': False,
+    'messages': [],
+    'chat_ended': False,
+    'feedback_request': False,
+    'quick_replies': ["Reset password", "VPN issues", "Software install"],
+    'show_typing': False,
+    'chat_started': False,
+    'show_quick_replies': False
+}
+for key, val in defaults.items():
+    if key not in st.session_state:
+        st.session_state[key] = val
 
-st.markdown("""
-<h1 class='elegant-heading'>🤖 HCIL IT Helpdesk Chatbot</h1>
-""", unsafe_allow_html=True)
+st.markdown("<h1 class='elegant-heading'>🤖 HCIL IT Helpdesk Chatbot</h1>", unsafe_allow_html=True)
 
-# Start Chat Button Logic
+# -------------------------------
+# Chat App Flow
+# -------------------------------
 if not st.session_state.chat_started:
-    st.markdown('<div class="start-chat-container">', unsafe_allow_html=True)
     if st.button("Start Chat", key="start_chat"):
         st.session_state.chat_started = True
         st.session_state.show_quick_replies = True
@@ -456,126 +425,69 @@ if not st.session_state.chat_started:
             "content": "👋 <b><span style='font-size:1.0em;color:#ffff;'>Konnichiwa!</span></b> How can I help you today?"
         })
         st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
-
 else:
-    # Main chat interface
-    if st.session_state.get('knowledge_base_loaded', False):
+    if st.session_state.knowledge_base_loaded:
         render_chat(st.session_state.messages)
 
-        # Chat reset logic
         if st.session_state.chat_ended:
             time.sleep(2)
-            st.session_state.messages = []
+            for key in ['messages', 'feedback_request', 'show_typing', 'chat_started', 'show_quick_replies']:
+                st.session_state[key] = defaults[key]
             st.session_state.chat_ended = False
-            st.session_state.feedback_request = False
-            st.session_state.show_typing = False
-            st.session_state.chat_started = False
-            st.session_state.show_quick_replies = False
             st.rerun()
 
-        if st.session_state.get("show_typing", False):
+        if st.session_state.show_typing:
             show_typing()
 
-        # Quick replies - show only at the beginning
         if st.session_state.show_quick_replies:
-           st.markdown("**Quick help topics:**")
-           for reply in st.session_state.quick_replies:
-              if st.button(reply, key=f"quick_reply_{reply}"):
-                 st.session_state.messages.append({"role": "user", "content": reply})
-                 st.session_state.show_typing = True
-                 st.session_state.show_quick_replies = False
-                 st.rerun()
+            st.markdown("**Quick help topics:**")
+            for reply in st.session_state.quick_replies:
+                if st.button(reply, key=f"quick_reply_{reply}"):
+                    st.session_state.messages.append({"role": "user", "content": reply})
+                    st.session_state.show_typing = True
+                    st.session_state.show_quick_replies = False
+                    st.rerun()
 
-
-        # Bot response logic
-        if st.session_state.get("show_typing", False):
+        if st.session_state.show_typing:
             time.sleep(1.2)
-            last_user_message = next((msg["content"] for msg in reversed(st.session_state.messages) if msg["role"] == "user"), None)
-
-            if last_user_message:
-                bot_response = get_bot_response(last_user_message, st.session_state.df, st.session_state.nn_model, model)
-                st.session_state.messages.append({"role": "bot", "content": bot_response})
+            last_user_msg = next((msg["content"] for msg in reversed(st.session_state.messages) if msg["role"] == "user"), None)
+            if last_user_msg:
+                response = get_bot_response(last_user_msg, st.session_state.df, st.session_state.nn_model, model)
+                st.session_state.messages.append({"role": "bot", "content": response})
                 st.session_state.feedback_request = True
                 st.session_state.show_typing = False
                 st.rerun()
-
     else:
-        st.info("Attempting to load knowledge base... If this message persists, check the 'KNOWLEDGE_BASE_PATH' in the code and ensure the file exists.")
+        st.info("Trying to load the knowledge base...")
 
-# FIXED: Floating Input Bar and Feedback (Gemini-style, Clean Layout)
-
+# -------------------------------
+# Input Bar + Feedback
+# -------------------------------
 if st.session_state.chat_started and not st.session_state.chat_ended:
+    if st.session_state.feedback_request:
+        st.markdown("---")
+        st.write("Was this helpful?")
+        col1, col2, col3, col4 = st.columns(4)
+        if col1.button("👍"): st.session_state.messages.append({"role": "bot", "content": "Glad it helped!"}); st.session_state.feedback_request = False; st.rerun()
+        if col2.button("👎"): st.session_state.messages.append({"role": "bot", "content": "Sorry. Try asking differently?"}); st.session_state.feedback_request = False; st.rerun()
+        if col3.button("🤔"): st.session_state.messages.append({"role": "bot", "content": "I'm trying my best! 😅"}); st.session_state.feedback_request = False; st.rerun()
+        if col4.button("❤️"): st.session_state.messages.append({"role": "bot", "content": "Thanks for the love!"}); st.session_state.feedback_request = False; st.rerun()
 
-    # Spacing for chat area to avoid being hidden by fixed bar
-    st.markdown("<br><br><br>", unsafe_allow_html=True)
-
-    # Minimal Feedback Section (ABOVE input bar)
-    if st.session_state.feedback_request:
-        st.markdown("---")
-        st.write("Was this helpful?")
-        col1, col2, col3, col4 = st.columns(4)
-        if col1.button("👍", key="fb_like"):
-            st.session_state.messages.append({"role": "bot", "content": "Great! Let me know if there's anything else I can help with."})
-            st.session_state.feedback_request = False
-            st.rerun()
-        if col2.button("👎", key="fb_dislike"):
-            st.session_state.messages.append({"role": "bot", "content": "Sorry about that. Could you rephrase your question?"})
-            st.session_state.feedback_request = False
-            st.rerun()
-        if col3.button("🤔", key="fb_confused"):
-            st.session_state.messages.append({"role": "bot", "content": "I'm here to help! Try asking in a different way."})
-            st.session_state.feedback_request = False
-            st.rerun()
-        if col4.button("❤️", key="fb_love"):
-            st.session_state.messages.append({"role": "bot", "content": "Thanks for the love! 😊"})
-            st.session_state.feedback_request = False
-            st.rerun()
-
-    # Gemini-style fixed center input bar
-    st.markdown("""
-    <style>
-    .gemini-input-wrapper {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        background: #1F1F1F;
-        padding: 1rem 0.5rem;
-        border-top: 1px solid #444;
-        z-index: 999;
-    }
-    .gemini-form {
-        max-width: 720px;
-        margin: 0 auto;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-
-    st.markdown('<div class="gemini-input-wrapper"><div class="gemini-form">', unsafe_allow_html=True)
-    with st.form("chat_input_form", clear_on_submit=True):
-        col1, col2 = st.columns([6, 1])
-        with col1:
-            user_input = st.text_input(
-                "Your message...",
-                key="input_bar",
-                label_visibility="collapsed"
-            )
-        with col2:
-            send_clicked = st.form_submit_button("▶")
-
-        if send_clicked and user_input.strip():
-            user_input_clean = user_input.lower().strip()
-            st.session_state.messages.append({"role": "user", "content": user_input})
-
-            if user_input_clean in ["bye", "end", "quit"]:
-                st.session_state.messages.append({"role": "bot", "content": "Thank you for chatting, <b><span style='font-size:1.2em;color:#ffff;'>Mata Ne!</span></b> 👋"})
-                st.session_state.chat_ended = True
-                st.session_state.feedback_request = False
-                st.session_state.show_typing = False
-                st.rerun()
-            else:
-                st.session_state.show_typing = True
-                st.session_state.show_quick_replies = False
-                st.rerun()
-   st.markdown('</div></div>', unsafe_allow_html=True)
+    with st.form("chat_input_form", clear_on_submit=True):
+        col1, col2 = st.columns([6, 1])
+        with col1:
+            user_input = st.text_input("Your message...", key="input_bar", label_visibility="collapsed")
+        with col2:
+            send_clicked = st.form_submit_button("▶")
+        if send_clicked and user_input.strip():
+            user_input_clean = user_input.lower().strip()
+            st.session_state.messages.append({"role": "user", "content": user_input})
+            if user_input_clean in ["bye", "quit", "end"]:
+                st.session_state.messages.append({"role": "bot", "content": "Thank you for chatting, <b><span style='font-size:1.2em;color:#ffff;'>Mata Ne!</span></b> 👋"})
+                st.session_state.chat_ended = True
+                st.session_state.feedback_request = False
+                st.session_state.show_typing = False
+            else:
+                st.session_state.show_typing = True
+                st.session_state.show_quick_replies = False
+            st.rerun()
