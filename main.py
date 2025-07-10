@@ -466,15 +466,14 @@ else:
             show_typing()
 
         # Quick replies - show only at the beginning
-        if st.session_state.show_quick_replies and len(st.session_state.messages) == 1:
-            st.markdown('<div class="quick-reply-container">', unsafe_allow_html=True)
-            for reply in st.session_state.quick_replies:
-                if st.button(reply, key=f"quick_reply_{reply}"):
-                    st.session_state.messages.append({"role": "user", "content": reply})
-                    st.session_state.show_typing = True
-                    st.session_state.show_quick_replies = False
-                    st.rerun()
-            st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown('<div style="margin-bottom:3rem;">', unsafe_allow_html=True)
+        for reply in st.session_state.quick_replies:
+            if st.button(reply, key=f"quick_reply_{reply}"):
+               st.session_state.messages.append({"role": "user", "content": reply})
+               st.session_state.show_typing = True
+               st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
+
 
         # Bot response logic
         if st.session_state.get("show_typing", False):
@@ -496,31 +495,26 @@ st.markdown('</div>', unsafe_allow_html=True)
 # FIXED: Floating Input Bar and Feedback (ChatGPT/Gemini Style)
 if st.session_state.chat_started and not st.session_state.chat_ended:
     # Floating feedback buttons
-    if st.session_state.feedback_request:
-        feedback_placeholder = st.empty()
-        with feedback_placeholder.container():
-            st.markdown('<div class="fixed-feedback-wrapper">', unsafe_allow_html=True)
-            st.markdown('<h4>Was this helpful?</h4>', unsafe_allow_html=True)
-            
-            col1, col2, col3, col4 = st.columns(4)
-            if col1.button("👍", use_container_width=True, key="feedback_like"):
-                st.session_state.messages.append({"role": "bot", "content": "Great! Let me know if there is something else that I can help you with."})
-                st.session_state.feedback_request = False
-                st.rerun()
-            if col2.button("👎", use_container_width=True, key="feedback_dislike"):
-                st.session_state.messages.append({"role": "bot", "content": "I apologize. Could you please rephrase your question?"})
-                st.session_state.feedback_request = False
-                st.rerun()
-            if col3.button("🤔", use_container_width=True, key="feedback_confused"):
-                st.session_state.messages.append({"role": "bot", "content": "I'm here to help! Feel free to ask another question."})
-                st.session_state.feedback_request = False
-                st.rerun()
-            if col4.button("❤️", use_container_width=True, key="feedback_love"):
-                st.session_state.messages.append({"role": "bot", "content": "Thank you for your feedback! 😊"})
-                st.session_state.feedback_request = False
-                st.rerun()
-            
-            st.markdown('</div>', unsafe_allow_html=True)
+  if st.session_state.feedback_request:
+      st.markdown("#### Was this helpful?")
+      col1, col2, col3, col4 = st.columns(4)
+      if col1.button("👍", use_container_width=True, key="feedback_like"):
+         st.session_state.messages.append({"role": "bot", "content": "Great! Let me know if there is something else that I can help you with."})
+         st.session_state.feedback_request = False
+         st.rerun()
+      if col2.button("👎", use_container_width=True, key="feedback_dislike"):
+         st.session_state.messages.append({"role": "bot", "content": "I apologize. Could you please rephrase your question?"})
+         st.session_state.feedback_request = False
+         st.rerun()
+      if col3.button("🤔", use_container_width=True, key="feedback_confused"):
+         st.session_state.messages.append({"role": "bot", "content": "I'm here to help! Feel free to ask another question."})
+         st.session_state.feedback_request = False
+         st.rerun()
+      if col4.button("❤️", use_container_width=True, key="feedback_love"):
+         st.session_state.messages.append({"role": "bot", "content": "Thank you for your feedback! 😊"})
+         st.session_state.feedback_request = False
+         st.rerun()
+
 
     # Floating input bar
     input_placeholder = st.empty()
