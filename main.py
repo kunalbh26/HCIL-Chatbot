@@ -211,6 +211,11 @@ animation: blink 1.2s infinite both;
 }}
 
 /* New style for the "Start Chat" button */
+/* The actual Streamlit button will be hidden, but its click event will be triggered */
+div.stButton > button {{
+    display: none; /* Hide the default Streamlit button styling */
+}}
+
 .start-chat-button-style {{
     background: linear-gradient(90deg, #e53935 0%, #b71c1c 100%);
     color: #fff;
@@ -418,21 +423,19 @@ st.markdown('<div class="main">', unsafe_allow_html=True)
 
 # Conditional rendering based on chat_started
 if not st.session_state.chat_started and st.session_state.get('knowledge_base_loaded', False):
-    # Display the "Start Chat" button
-    start_chat_button = st.markdown(
+    # Use a placeholder for the actual Streamlit button
+    button_placeholder = st.empty()
+
+    # Display the custom-styled button using markdown
+    st.markdown(
         """
-        <button class="start-chat-button-style" onclick="document.getElementById('start_chat_button_id').click();">Start Chat</button>
-        <script>
-            // This script helps to trigger the Streamlit button click programmatically
-            const button = document.querySelector('.start-chat-button-style');
-            if (button) {
-                button.setAttribute('id', 'start_chat_button_id');
-            }
-        </script>
+        <button class="start-chat-button-style" onclick="document.getElementById('hidden_start_chat_button').click();">Start Chat</button>
         """,
         unsafe_allow_html=True
     )
-    if st.button("Start Chat", key="start_chat_actual_button", type="secondary", help="Click to begin chat", use_container_width=False):
+
+    # Place a hidden Streamlit button that gets clicked by the custom button's JavaScript
+    if button_placeholder.button("Start Chat", key="hidden_start_chat_button"):
         st.session_state.chat_started = True
         st.rerun()
 
