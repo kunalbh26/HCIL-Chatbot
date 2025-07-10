@@ -177,7 +177,7 @@ html, body, .stApp {{
     justify-content: flex-start;
 }}
 
-/* Quick reply buttons */
+/* Quick reply buttons 
 .quick-reply {{
     display: inline-block;
     background: #fff;
@@ -196,7 +196,7 @@ html, body, .stApp {{
     background: #e53935;
     color: #fff;
 }}
-
+*/
 /* Enhanced Sidebar Title */
 .sidebar-title {{
     font-size: 5.5rem;
