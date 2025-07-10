@@ -33,11 +33,34 @@ html, body, .stApp {{
     margin: 2.0rem auto;
 }}
 
-/* Sidebar Background */
+/* ### MODIFICATION 3: Added a white border to the right of the sidebar ### */
 .stSidebar > div:first-child {{
     background-color: #323232 !important; /* Darker Gray for Sidebar */
-    border-right: 2px solid white; /* Added white border to the right */
+    border-right: 2px solid white; /* White line separator */
 }}
+
+/* ### MODIFICATION 2: CSS for the new 'Start Chat' button ### */
+.start-chat-button-container {{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 2rem;
+}}
+.start-chat-button {{
+    background: linear-gradient(90deg, #e53935 0%, #b71c1c 100%);
+    color: #fff;
+    border-radius: 20px;
+    padding: 1rem 1.5rem;
+    cursor: pointer;
+    font-size: 1.08rem;
+    border: 2px solid #fff;
+    font-weight: bold;
+    transition: transform 0.2s;
+}}
+.start-chat-button:hover {{
+    transform: scale(1.05);
+}}
+
 
 /* Chat bubbles and avatars - unchanged */
 .chat-bubble {{
@@ -209,34 +232,6 @@ animation: blink 1.2s infinite both;
 0%, 80%, 100% {{ opacity: 0.2; }}
 40% {{ opacity: 1; }}
 }}
-
-/* New style for the "Start Chat" button */
-/* Apply styling to the Streamlit button itself and center its container */
-div.stButton {{
-    text-align: center; /* Center the button container */
-    margin: 3rem auto; /* Center the button itself within the main div */
-    width: fit-content; /* Ensure the div itself wraps the button */
-}}
-
-div.stButton > button {{
-    background: linear-gradient(90deg, #e53935 0%, #b71c1c 100%);
-    color: #fff;
-    border: 2px solid #fff;
-    border-radius: 20px; /* Rounded corners like a bubble */
-    padding: 1rem 2rem;
-    font-size: 1.5rem;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background 0.2s, color 0.2s, transform 0.2s;
-    line-height: 1; /* Adjust line height for better vertical centering of text */
-    display: inline-block; /* Allow it to be centered with text-align */
-}}
-div.stButton > button:hover {{
-    background: #fff;
-    color: #e53935;
-    border: 2px solid #e53935;
-    transform: scale(1.05);
-}}
 </style>
 """, unsafe_allow_html=True)
 
@@ -333,25 +328,25 @@ def get_greeting_response(greet):
 def get_bot_response(user_query, df, nn_model, model):
     if is_gibberish(user_query):
         return "I'm sorry, I couldn't understand that. Could you please rephrase your question?"
-    
+
     greet = is_greeting(user_query)
     if greet:
         return get_greeting_response(greet)
-        
+
     questions = df['questions'].tolist()
     best_match, score = process.extractOne(user_query, questions, scorer=fuzz.token_sort_ratio)
-    
+
     if score > 70:
         idx = questions.index(best_match)
         return df.iloc[idx]['answers']
-        
+
     query_embed = model.encode([user_query])
     distances, indices = nn_model.kneighbors(query_embed)
     best_idx = indices[0][0]
-    
+
     if distances[0][0] > 0.45:
         return "I'm sorry, I couldn't understand that. Could you please rephrase your question?"
-        
+
     response = df.iloc[best_idx]['answers']
     return response
 
@@ -366,7 +361,7 @@ def render_chat(messages):
                 </div>
                 """, unsafe_allow_html=True
             )
-        else: # bot
+        else:  # bot
             st.markdown(
                 f"""
                 <div class="bot-row">
@@ -411,7 +406,8 @@ if 'quick_replies' not in st.session_state:
     st.session_state['quick_replies'] = ["Reset password", "VPN issues", "Software install"]
 if 'show_typing' not in st.session_state:
     st.session_state['show_typing'] = False
-if 'chat_started' not in st.session_state: # New session state for controlling chat start
+### MODIFICATION 1: New session state to control the start of the chat ###
+if 'chat_started' not in st.session_state:
     st.session_state['chat_started'] = False
 
 
@@ -421,106 +417,131 @@ st.markdown("""
 
 st.markdown('<div class="main">', unsafe_allow_html=True)
 
-# Conditional rendering based on chat_started
-if not st.session_state.chat_started and st.session_state.get('knowledge_base_loaded', False):
-    # This is the *only* button definition for "Start Chat"
-    if st.button("Start Chat", key="start_chat_button"):
-        st.session_state.chat_started = True
-        st.rerun()
 
-elif st.session_state.get('knowledge_base_loaded', False): # Only proceed if KB is loaded and chat has started
-    # Display initial greeting if chat hasn't started and messages are empty
-    if not st.session_state.messages:
+### MODIFICATION 1: Logic to show 'Start Chat' button or the chat interface ###
+if not st.session_state.chat_started:
+    # Centered container for the button
+    st.markdown(
+        """
+        <div class="start-chat-button-container">
+            <style>
+                .stButton button {
+                    background: linear-gradient(90deg, #e53935 0%, #b71c1c 100%);
+                    color: #fff;
+                    border-radius: 20px;
+                    padding: 1rem 1.5rem;
+                    cursor: pointer;
+                    font-size: 1.08rem;
+                    border: 2px solid #fff;
+                    font-weight: bold;
+                    transition: transform 0.2s;
+                }
+                .stButton button:hover {
+                    transform: scale(1.05);
+                    color: #fff; /* Keep text color white on hover */
+                }
+            </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+    if st.button("Start Chat", key="start_chat"):
+        st.session_state.chat_started = True
         st.session_state.messages.append({
             "role": "bot",
             "content": "👋 <b><span style='font-size:1.0em;color:#ffff;'>Konnichiwa!</span></b> How can I help you today?"
         })
-
-    render_chat(st.session_state.messages)
-
-    # *** FIX 1: CHAT RESET LOGIC ***
-    # If the chat has ended, wait 2 seconds, then reset the state and rerun.
-    if st.session_state.chat_ended:
-        time.sleep(2)
-        st.session_state.messages = []
-        st.session_state.chat_ended = False
-        st.session_state.feedback_request = False
-        st.session_state.show_typing = False
-        st.session_state.chat_started = False # Reset chat_started to show the button again
         st.rerun()
 
-    if st.session_state.get("show_typing", False):
-        show_typing()
-    
-    # *** FIX 2: VERTICAL QUICK REPLIES ***
-    st.markdown('<div style="margin-bottom:3rem;">', unsafe_allow_html=True)
-    for reply in st.session_state.quick_replies:
-        # Use a consistent key for buttons to avoid Streamlit warnings
-        if st.button(reply, key=f"quick_reply_{reply}"):
-            st.session_state.messages.append({"role": "user", "content": reply})
-            st.session_state.show_typing = True
-            st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
+else: # This block runs only after 'Start Chat' is clicked
+    # Main chat interface logic
+    if st.session_state.get('knowledge_base_loaded', False): # Only proceed if KB is loaded
+        render_chat(st.session_state.messages)
 
-    # Feedback Reactions
-    if st.session_state.feedback_request:
-        st.markdown("#### Was this helpful?")
-        col1, col2, col3, col4 = st.columns(4)
-        # Unique keys for feedback buttons
-        if col1.button("👍", use_container_width=True, key="feedback_like"):
-            st.session_state.messages.append({"role": "bot", "content": "Great! Let me know if there is something else that I can help you with."})
+        # *** FIX 1: CHAT RESET LOGIC ***
+        # If the chat has ended, wait 2 seconds, then reset the state and rerun.
+        if st.session_state.chat_ended:
+            time.sleep(2)
+            # Reset all relevant states to start fresh
+            st.session_state.messages = []
+            st.session_state.chat_ended = False
             st.session_state.feedback_request = False
-            st.rerun()
-        if col2.button("👎", use_container_width=True, key="feedback_dislike"):
-            st.session_state.messages.append({"role": "bot", "content": "I apologize. Could you please rephrase your question?"})
-            st.session_state.feedback_request = False
-            st.rerun()
-        if col3.button("🤔", use_container_width=True, key="feedback_confused"):
-            st.session_state.messages.append({"role": "bot", "content": "I'm here to help! Feel free to ask another question."})
-            st.session_state.feedback_request = False
-            st.rerun()
-        if col4.button("❤️", use_container_width=True, key="feedback_love"):
-            st.session_state.messages.append({"role": "bot", "content": "Thank you for your feedback! 😊"})
-            st.session_state.feedback_request = False
-            st.rerun()
-
-    # Input Bar
-    if not st.session_state.chat_ended:
-        with st.form("chat_input_form", clear_on_submit=True):
-            col1, col2 = st.columns([6, 1])
-            with col1:
-                user_input = st.text_input("user_input", placeholder="Type here...", key="input_bar", label_visibility="collapsed")
-            with col2:
-                send_clicked = st.form_submit_button("Send")
-
-            if send_clicked and user_input.strip():
-                user_input_clean = user_input.lower().strip()
-
-                st.session_state.messages.append({"role": "user", "content": user_input})
-
-                if user_input_clean in ["bye", "end", "quit"]:
-                    st.session_state.messages.append({"role": "bot", "content": "Thank you for chatting, <b><span style='font-size:1.2em;color:#ffff;'>Mata Ne!</span></b> (see you later) 👋"})
-                    st.session_state.chat_ended = True
-                    st.session_state.feedback_request = False
-                    st.session_state.show_typing = False
-                    st.rerun()
-                else:
-                    st.session_state.show_typing = True
-                    st.rerun()
-
-    # Bot response logic
-    if st.session_state.get("show_typing", False):
-        time.sleep(1.2)
-        last_user_message = next((msg["content"] for msg in reversed(st.session_state.messages) if msg["role"] == "user"), None)
-
-        if last_user_message:
-            bot_response = get_bot_response(last_user_message, st.session_state.df, st.session_state.nn_model, model)
-            st.session_state.messages.append({"role": "bot", "content": bot_response})
-            st.session_state.feedback_request = True
             st.session_state.show_typing = False
+            st.session_state.chat_started = False # Reset to show start button again
             st.rerun()
-else:
-    # This message should ideally not be seen if the KB loads correctly
-    st.info("Attempting to load knowledge base... If this message persists, check the 'KNOWLEDGE_BASE_PATH' in the code and ensure the file exists.")
+
+        if st.session_state.get("show_typing", False):
+            show_typing()
+
+        # *** FIX 2: VERTICAL QUICK REPLIES ***
+        st.markdown('<div style="margin-bottom:3rem;">', unsafe_allow_html=True)
+        for reply in st.session_state.quick_replies:
+            # Use a consistent key for buttons to avoid Streamlit warnings
+            if st.button(reply, key=f"quick_reply_{reply}"):
+                st.session_state.messages.append({"role": "user", "content": reply})
+                st.session_state.show_typing = True
+                st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        # Feedback Reactions
+        if st.session_state.feedback_request:
+            st.markdown("#### Was this helpful?")
+            col1, col2, col3, col4 = st.columns(4)
+            # Unique keys for feedback buttons
+            if col1.button("👍", use_container_width=True, key="feedback_like"):
+                st.session_state.messages.append({"role": "bot", "content": "Great! Let me know if there is something else that I can help you with."})
+                st.session_state.feedback_request = False
+                st.rerun()
+            if col2.button("👎", use_container_width=True, key="feedback_dislike"):
+                st.session_state.messages.append({"role": "bot", "content": "I apologize. Could you please rephrase your question?"})
+                st.session_state.feedback_request = False
+                st.rerun()
+            if col3.button("🤔", use_container_width=True, key="feedback_confused"):
+                st.session_state.messages.append({"role": "bot", "content": "I'm here to help! Feel free to ask another question."})
+                st.session_state.feedback_request = False
+                st.rerun()
+            if col4.button("❤️", use_container_width=True, key="feedback_love"):
+                st.session_state.messages.append({"role": "bot", "content": "Thank you for your feedback! 😊"})
+                st.session_state.feedback_request = False
+                st.rerun()
+
+        # Input Bar
+        if not st.session_state.chat_ended:
+            with st.form("chat_input_form", clear_on_submit=True):
+                col1, col2 = st.columns([6, 1])
+                with col1:
+                    user_input = st.text_input("user_input", placeholder="Type here...", key="input_bar", label_visibility="collapsed")
+                with col2:
+                    send_clicked = st.form_submit_button("Send")
+
+                if send_clicked and user_input.strip():
+                    user_input_clean = user_input.lower().strip()
+
+                    st.session_state.messages.append({"role": "user", "content": user_input})
+
+                    if user_input_clean in ["bye", "end", "quit"]:
+                        st.session_state.messages.append({"role": "bot", "content": "Thank you for chatting, <b><span style='font-size:1.2em;color:#ffff;'>Mata Ne!</span></b> (see you later) 👋"})
+                        st.session_state.chat_ended = True
+                        st.session_state.feedback_request = False
+                        st.session_state.show_typing = False
+                        st.rerun()
+                    else:
+                        st.session_state.show_typing = True
+                        st.rerun()
+
+        # Bot response logic
+        if st.session_state.get("show_typing", False):
+            time.sleep(1.2)
+            last_user_message = next((msg["content"] for msg in reversed(st.session_state.messages) if msg["role"] == "user"), None)
+
+            if last_user_message:
+                bot_response = get_bot_response(last_user_message, st.session_state.df, st.session_state.nn_model, model)
+                st.session_state.messages.append({"role": "bot", "content": bot_response})
+                st.session_state.feedback_request = True
+                st.session_state.show_typing = False
+                st.rerun()
+    else:
+        # This message should ideally not be seen if the KB loads correctly
+        st.info("Attempting to load knowledge base... If this message persists, check the 'KNOWLEDGE_BASE_PATH' in the code and ensure the file exists.")
 
 st.markdown('</div>', unsafe_allow_html=True)
