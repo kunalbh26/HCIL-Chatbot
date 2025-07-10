@@ -37,7 +37,7 @@ html, body, .stApp {{
 /* ### MODIFICATION 3: Added a white border to the right of the sidebar ### */
 .stSidebar > div:first-child {{
     background-color: #323232 !important; /* Darker Gray for Sidebar */
-    border-right: 2px solid #fff; /* White line separator */
+    border-right: 2px solid #ffffff !important; /* White line separator */
 }}
 
 /* ### MODIFICATION 1: Enhanced CSS for the 'Start Chat' button ### */
