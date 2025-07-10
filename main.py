@@ -177,26 +177,7 @@ html, body, .stApp {{
     justify-content: flex-start;
 }}
 
-/* Quick reply buttons 
-.quick-reply {{
-    display: inline-block;
-    background: #fff;
-    color: #e53935;
-    border-radius: 18px;
-    padding: 0.5rem 1.1rem;
-    margin: 0.15rem;
-    cursor: pointer;
-    font-size: 0.98rem;
-    border: 1.5px solid #e53935;
-    font-weight: 500;
-    transition: background 0.2s, color 0.2s;
-}}
 
-.quick-reply:hover {{
-    background: #e53935;
-    color: #fff;
-}}
-*/
 /* Enhanced Sidebar Title */
 .sidebar-title {{
     font-size: 5.5rem;
