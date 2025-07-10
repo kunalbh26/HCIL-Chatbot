@@ -261,4 +261,4 @@ model = load_sentence_transformer()
 
 # --- Pre-load Knowledge Base ---
 @st.cache_resource
-  def load_knowledge_base(path):
+def load_knowledge_base(path):
