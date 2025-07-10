@@ -24,7 +24,7 @@ html, body, .stApp {{
     color: white !important;
 }}
 
-/* Main Chat Area Background */
+/* Main Chat Area Background 
 .main {{
     background: #1F1F1F; /* Match the strict background */
     border-radius: 0px;
@@ -32,7 +32,7 @@ html, body, .stApp {{
     max-width: 640px;
     margin: 2.0rem auto;
     padding-bottom: 200px !important; /* Add space for fixed input bar */
-}}
+}}   */
 
 /* ### MODIFICATION 3: Added a white border to the right of the sidebar ### */
 .stSidebar > div:first-child {{
