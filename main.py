@@ -1,4 +1,3 @@
-
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -9,31 +8,38 @@ import re
 from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
 
+# --- Configuration for Pre-loaded Knowledge Base ---
+# IMPORTANT: Place your 'knowledge_base.xlsx' file in the same directory as this script,
+# or provide the correct path (e.g., 'data/knowledge_base.xlsx').
+KNOWLEDGE_BASE_PATH = 'dataset.xlsx'
+
 # -------------------------------
-# Custom CSS for Red-Black-White Theme (Modified for strict background and animation)
+# Custom CSS for Red-Black-White Theme (Modified for strict background, animations, and new styles)
 # -------------------------------
-st.markdown("""
+st.markdown(f"""
 <style>
-/* Ensure the very root HTML and body are black */
-html, body {
-    background-color: #000000 !important; /* Strict background color */
+/* Strict Background Color for the entire app */
+html, body, .stApp {{
+    background-color: #1F1F1F !important; /* Dark Gray Background */
     color: white !important;
-}
+}}
 
-/* Target Streamlit's main content area */
-.stApp {
-    background-color: #000000 !important; /* Strict background color for the app container */
-}
-
-/* Your existing .main style, updated to the desired background */
-.main {
-    background: #000000; /* Use your desired dark background here */
+/* Main Chat Area Background */
+.main {{
+    background: #1F1F1F; /* Match the strict background */
     border-radius: 0px;
     padding: 3.5rem !important;
     max-width: 640px;
     margin: 2.5rem auto;
-}
-.chat-bubble {
+}}
+
+/* Sidebar Background */
+.stSidebar > div:first-child {{
+    background-color: #323232 !important; /* Darker Gray for Sidebar */
+}}
+
+/* Chat bubbles and avatars - unchanged */
+.chat-bubble {{
 padding: 1rem 1.5rem;
 border-radius: 20px;
 margin-bottom: 14px;
@@ -44,24 +50,24 @@ word-break: break-word;
 font-size: 1.08rem;
 display: flex;
 align-items: center;
-}
-.user-bubble {
+}}
+.user-bubble {{
 background: #fff;
 color: #111;
 align-self: flex-end;
 margin-left: auto;
 margin-right: 0;
 border: 1.5px solid #e53935;
-}
-.bot-bubble {
+}}
+.bot-bubble {{
 background: linear-gradient(90deg, #e53935 0%, #b71c1c 100%);
 color: #fff;
 align-self: flex-start;
 margin-right: auto;
 margin-left: 0;
 border: 1.5px solid #fff;
-}
-.avatar {
+}}
+.avatar {{
 width: 38px; height: 38px; border-radius: 75%; margin: 0 10px;
 background: #3d3d3d;
 box-shadow: 0 2px 8px rgba(229,57,53,0.12);
@@ -70,14 +76,14 @@ text-align: center;
 line-height: 38px;
 border: 2px solid #ff0000;
 display: flex; align-items: center; justify-content: center;
-}
-.user-row {
+}}
+.user-row {{
 display: flex; flex-direction: row; align-items: flex-end; justify-content: flex-end;
-}
-.bot-row {
+}}
+.bot-row {{
 display: flex; flex-direction: row; align-items: flex-end; justify-content: flex-start;
-}
-.input-bar {
+}}
+.input-bar {{
 background: #222;
 border-radius: 20px;
 box-shadow: 0 2px 8px rgba(229,57,53,0.12);
@@ -85,8 +91,8 @@ margin-top: 0.5rem;
 display: flex;
 align-items: center;
 padding: 0.3rem 0.8rem;
-}
-.input-bar input {
+}}
+.input-bar input {{
 background: transparent;
 border: 2px solid #ff0000;
 color: #fff;
@@ -94,8 +100,8 @@ width: 100%;
 padding: 0.7rem 0.8rem;
 outline: none;
 font-size: 1rem;
-}
-.send-btn {
+}}
+.send-btn {{
 background: linear-gradient(90deg, #e53935 0%, #b71c1c 100%);
 color: #fff;
 border: none;
@@ -107,13 +113,13 @@ cursor: pointer;
 margin-left: 8px;
 transition: background 0.2s;
 display: flex; align-items: center; justify-content: center;
-}
-.send-btn:hover {
+}}
+.send-btn:hover {{
 background: #fff;
 color: #e53935;
 border: 1.5px solid #ff00;
-}
-.quick-reply {
+}}
+.quick-reply {{
 display: inline-block;
 background: #fff;
 color: #e53935;
@@ -125,58 +131,93 @@ font-size: 0.98rem;
 border: 1.5px solid #e53935;
 font-weight: 500;
 transition: background 0.2s, color 0.2s;
-}
-.quick-reply:hover {
+}}
+.quick-reply:hover {{
 background: #e53935;
 color: #fff;
-}
-.sidebar-title {
-font-size: 4.5rem;
-color: #EE4B2B;
+}}
+
+/* Enhanced Sidebar Title */
+.sidebar-title {{
+font-size: 5.5rem; /* Bigger font size */
+color: #EE4B2B; /* Keep original color or change as desired */
 font-weight: 900;
 text-align: center;
 margin: 0.5rem 0 1.5rem 0;
 letter-spacing: 0.05em;
 width: 100%;
 line-height: 1.2;
-/* Add animation here */
-animation: rotateY 3s infinite linear; /* Apply the animation */
-transform-style: preserve-3d; /* For 3D transformations */
-}
+/* 3D rotation animation */
+animation: rotate3D 5s infinite linear; /* Slower, more impactful rotation */
+transform-style: preserve-3d;
+perspective: 800px; /* Adds perspective for 3D effect */
+/* Optional: text shadow for more depth, subtle glow */
+text-shadow: 
+    0 0 5px rgba(238, 75, 43, 0.5), /* Red glow */
+    0 0 10px rgba(238, 75, 43, 0.4),
+    0 0 15px rgba(238, 75, 43, 0.3),
+    1px 1px 2px rgba(0,0,0,0.8); /* Subtle shadow for depth */
+}}
 
-/* Keyframes for vertical rotation */
-@keyframes rotateY {
-    0% {
-        transform: rotateY(0deg);
-    }
-    50% {
-        transform: rotateY(180deg);
-    }
-    100% {
-        transform: rotateY(360deg);
-    }
-}
+/* Keyframes for a more 3D rotation */
+@keyframes rotate3D {{
+    0% {{
+        transform: rotateY(0deg) scale(1);
+    }}
+    25% {{
+        transform: rotateY(90deg) scale(1.05); /* Slight scale for emphasis */
+    }}
+    50% {{
+        transform: rotateY(180deg) scale(1);
+    }}
+    75% {{
+        transform: rotateY(270deg) scale(1.05);
+    }}
+    100% {{
+        transform: rotateY(360deg) scale(1);
+    }}
+}}
 
-@keyframes fadeInUp {
-from { opacity: 0; transform: translateY(20px);}
-to { opacity: 1; transform: translateY(0);}
-}
-.typing-indicator {
+
+/* Main Chatbot Title Enhancement */
+.elegant-heading {{
+    font-size: 5.5rem; /* Bigger font size */
+    font-weight: 800;
+    text-align: center;
+    margin-top: -5px;
+    color: #ffffff; /* White text color */
+    animation: fadeInUp 1.6s ease-out;
+    /* Red Glow for the main title */
+    text-shadow:
+        0 0 5px #e53935, /* Soft inner glow */
+        0 0 10px #e53935,
+        0 0 15px #e53935,
+        0 0 20px #e53935,
+        0 0 25px #e53935; /* Stronger outer glow */
+}}
+
+
+@keyframes fadeInUp {{
+    0% {{ opacity: 0; transform: translateY(20px); }}
+    100% {{ opacity: 1; transform: translateY(0); }}
+}}
+.typing-indicator {{
 display: flex; align-items: center; margin-bottom: 1.1rem;
-}
-.typing-dots span {
+}}
+.typing-dots span {{
 height: 10px; width: 10px; margin: 0 2px;
 background: #e53935; border-radius: 25%; display: inline-block;
 animation: blink 1.2s infinite both;
-}
-.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
-.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
-@keyframes blink {
-0%, 80%, 100% { opacity: 0.2; }
-40% { opacity: 1; }
-}
+}}
+.typing-dots span:nth-child(2) {{ animation-delay: 0.2s; }}
+.typing-dots span:nth-child(3) {{ animation-delay: 0.4s; }}
+@keyframes blink {{
+0%, 80%, 100% {{ opacity: 0.2; }}
+40% {{ opacity: 1; }}
+}}
 </style>
 """, unsafe_allow_html=True)
+
 # -------------------------------
 # Page Configuration
 # -------------------------------
@@ -196,8 +237,33 @@ def load_sentence_transformer():
 
 model = load_sentence_transformer()
 
+# --- Pre-load Knowledge Base ---
+@st.cache_resource
+def load_knowledge_base(path):
+    try:
+        df = pd.read_excel(path)
+        required_columns = {'questions', 'answers', 'categories', 'tags'}
+        if not required_columns.issubset(df.columns):
+            st.error(f"❌ **Error:** The knowledge base file '{path}' is missing required columns: `questions`, `answers`, `categories`, `tags`.")
+            st.stop() # Stop the app if columns are missing
+        embeddings = model.encode(df['questions'].tolist())
+        nn_model = NearestNeighbors(n_neighbors=1, metric='cosine')
+        nn_model.fit(np.array(embeddings))
+        return df, nn_model
+    except FileNotFoundError:
+        st.error(f"❌ **Error:** Knowledge base file not found at '{path}'. Please ensure it's in the correct directory.")
+        st.stop() # Stop the app if file is not found
+    except Exception as e:
+        st.error(f"❌ An error occurred while loading the knowledge base: {e}")
+        st.stop()
+
+# Load the knowledge base globally when the app starts
+if 'df' not in st.session_state or 'nn_model' not in st.session_state:
+    st.session_state.df, st.session_state.nn_model = load_knowledge_base(KNOWLEDGE_BASE_PATH)
+    st.session_state.knowledge_base_loaded = True # Set to True once loaded
+
 # -------------------------------
-# Helper Functions
+# Helper Functions (Unchanged)
 # -------------------------------
 def is_gibberish(text):
     text = text.strip()
@@ -299,16 +365,12 @@ def show_typing():
     """, unsafe_allow_html=True)
 
 # -------------------------------
-# Sidebar Configuration
+# Sidebar Configuration (Modified)
 # -------------------------------
 with st.sidebar:
     st.markdown('<div class="sidebar-title">HCIL</div>', unsafe_allow_html=True)
-    with st.expander("📂 Knowledge Base Setup", expanded=False):
-        uploaded_file = st.file_uploader(
-            "Upload knowledge base!",
-            type=["xlsx"],
-            help="Upload an Excel file with 'questions', 'answers', 'categories', and 'tags' columns."
-        )
+    # Removed the file uploader section here
+
     st.info("Say 'bye', 'quit', or 'end' to close our chat.")
 
 # -------------------------------
@@ -316,7 +378,7 @@ with st.sidebar:
 # -------------------------------
 # Initialize session state variables at the top
 if 'knowledge_base_loaded' not in st.session_state:
-    st.session_state['knowledge_base_loaded'] = False
+    st.session_state['knowledge_base_loaded'] = False # This will be set to True by load_knowledge_base
 if 'messages' not in st.session_state:
     st.session_state['messages'] = []
 if 'chat_ended' not in st.session_state:
@@ -330,59 +392,22 @@ if 'show_typing' not in st.session_state:
 
 
 st.markdown("""
-<style>
-.elegant-heading {
-    font-size: 5.0rem;
-    font-weight: 800;
-    text-align: center;
-    margin-top: -5px;
-    color: #ffffff;
-    animation: fadeInUp 1.6s ease-out;
-}
-
-@keyframes fadeInUp {
-    0% { opacity: 0; transform: translateY(20px); }
-    100% { opacity: 1; transform: translateY(0); }
-}
-</style>
-
 <h1 class='elegant-heading'>🤖 HCIL IT Helpdesk Chatbot</h1>
 """, unsafe_allow_html=True)
 
 st.markdown('<div class="main">', unsafe_allow_html=True)
 
-# Handle knowledge base upload
-if uploaded_file is not None and not st.session_state.knowledge_base_loaded:
-    with st.spinner("🚀 Launching the bot... Please wait."):
-        try:
-            df = pd.read_excel(uploaded_file)
-            required_columns = {'questions', 'answers', 'categories', 'tags'}
-            if not required_columns.issubset(df.columns):
-                st.error("❌ **Error:** The file is missing required columns: `questions`, `answers`, `categories`, `tags`.")
-            else:
-                st.session_state.df = df
-                embeddings = model.encode(df['questions'].tolist())
-                nn_model = NearestNeighbors(n_neighbors=1, metric='cosine')
-                nn_model.fit(np.array(embeddings))
-                st.session_state.nn_model = nn_model
-                st.session_state.knowledge_base_loaded = True
-                st.session_state.messages = []  # Clear previous messages
-                st.session_state.chat_ended = False
-                st.success("✅ Knowledge base loaded! The bot is ready.")
-                time.sleep(1)
-                st.rerun()
-        except Exception as e:
-            st.error(f"❌ An error occurred: {e}")
 
-# Display initial greeting if chat hasn't started and KB is loaded
-if st.session_state.knowledge_base_loaded and not st.session_state.messages:
+# Display initial greeting if chat hasn't started
+# This will now always run after the KB is confirmed loaded
+if not st.session_state.messages and st.session_state.get('knowledge_base_loaded', False):
     st.session_state.messages.append({
         "role": "bot",
         "content": "👋 <b><span style='font-size:1.0em;color:#ffff;'>Konnichiwa!</span></b> How can I help you today?"
     })
 
 # Main chat interface logic
-if st.session_state.knowledge_base_loaded:
+if st.session_state.get('knowledge_base_loaded', False): # Only proceed if KB is loaded
     render_chat(st.session_state.messages)
 
     # *** FIX 1: CHAT RESET LOGIC ***
@@ -399,10 +424,10 @@ if st.session_state.knowledge_base_loaded:
         show_typing()
     
     # *** FIX 2: VERTICAL QUICK REPLIES ***
-    # Removed st.columns to stack buttons vertically.
     st.markdown('<div style="margin-bottom:3rem;">', unsafe_allow_html=True)
     for reply in st.session_state.quick_replies:
-        if st.button(reply, key=f"quick_{reply}"):
+        # Use a consistent key for buttons to avoid Streamlit warnings
+        if st.button(reply, key=f"quick_reply_{reply}"):
             st.session_state.messages.append({"role": "user", "content": reply})
             st.session_state.show_typing = True
             st.rerun()
@@ -412,19 +437,20 @@ if st.session_state.knowledge_base_loaded:
     if st.session_state.feedback_request:
         st.markdown("#### Was this helpful?")
         col1, col2, col3, col4 = st.columns(4)
-        if col1.button("👍", use_container_width=True):
+        # Unique keys for feedback buttons
+        if col1.button("👍", use_container_width=True, key="feedback_like"):
             st.session_state.messages.append({"role": "bot", "content": "Great! Let me know if there is something else that I can help you with."})
             st.session_state.feedback_request = False
             st.rerun()
-        if col2.button("👎", use_container_width=True):
+        if col2.button("👎", use_container_width=True, key="feedback_dislike"):
             st.session_state.messages.append({"role": "bot", "content": "I apologize. Could you please rephrase your question?"})
             st.session_state.feedback_request = False
             st.rerun()
-        if col3.button("🤔", use_container_width=True):
+        if col3.button("🤔", use_container_width=True, key="feedback_confused"):
             st.session_state.messages.append({"role": "bot", "content": "I'm here to help! Feel free to ask another question."})
             st.session_state.feedback_request = False
             st.rerun()
-        if col4.button("❤️", use_container_width=True):
+        if col4.button("❤️", use_container_width=True, key="feedback_love"):
             st.session_state.messages.append({"role": "bot", "content": "Thank you for your feedback! 😊"})
             st.session_state.feedback_request = False
             st.rerun()
@@ -465,6 +491,7 @@ if st.session_state.knowledge_base_loaded:
             st.session_state.show_typing = False
             st.rerun()
 else:
-    st.info("⬆️ Please upload a knowledge base file in the sidebar to begin the chat.")
+    # This message should ideally not be seen if the KB loads correctly
+    st.info("Attempting to load knowledge base... If this message persists, check the 'KNOWLEDGE_BASE_PATH' in the code and ensure the file exists.")
 
 st.markdown('</div>', unsafe_allow_html=True)
