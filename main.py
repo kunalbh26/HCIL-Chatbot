@@ -479,9 +479,9 @@ else:
 
         # Quick replies - show only at the beginning
         if st.session_state.show_quick_replies:
-           st.markdown("**Quick help topics:**")
-           for reply in st.session_state.quick_replies:
-              if st.button(reply, key=f"quick_reply_{reply}"):
+           st.markdown("**Quick help topics:**")
+           for reply in st.session_state.quick_replies:
+              if st.button(reply, key=f"quick_reply_{reply}"):
                  st.session_state.messages.append({"role": "user", "content": reply})
                  st.session_state.show_typing = True
                  st.session_state.show_quick_replies = False
