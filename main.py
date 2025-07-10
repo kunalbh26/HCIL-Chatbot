@@ -15,7 +15,7 @@ st.markdown("""
 <style>
 /* 💡 OVERRIDE Streamlit's default light/dark theming behavior */
 html, body, .main {
-    background-color: transparent !important;
+    background-color: #000000 !important;
     color: white !important;
 }
 body {
