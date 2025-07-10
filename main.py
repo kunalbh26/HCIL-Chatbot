@@ -8,25 +8,39 @@ import re
 from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
 
+import streamlit as st
+import pandas as pd
+import numpy as np
+from sentence_transformers import SentenceTransformer
+from sklearn.neighbors import NearestNeighbors
+import time
+import re
+from fuzzywuzzy import fuzz
+from fuzzywuzzy import process
+
 # -------------------------------
-# Custom CSS for Red-Black-White Theme
+# Custom CSS for Red-Black-White Theme (Modified for strict background and animation)
 # -------------------------------
 st.markdown("""
 <style>
-/* 💡 OVERRIDE Streamlit's default light/dark theming behavior */
-html, body, .main {
-    background-color: #000000 !important;
+/* Ensure the very root HTML and body are black */
+html, body {
+    background-color: #323232 !important; /* Strict background color */
     color: white !important;
 }
-body {
-background: #000000;
+
+/* Target Streamlit's main content area */
+.stApp {
+    background-color: #323232 !important; /* Strict background color for the app container */
 }
+
+/* Your existing .main style, updated to the desired background */
 .main {
-background: #000000;
-border-radius: 0px;
-padding: 3.5rem !important;
-max-width: 640px;
-margin: 2.5rem auto;
+    background: #323232; /* Use your desired dark background here */
+    border-radius: 0px;
+    padding: 3.5rem !important;
+    max-width: 640px;
+    margin: 2.5rem auto;
 }
 .chat-bubble {
 padding: 1rem 1.5rem;
@@ -134,7 +148,24 @@ margin: 0.5rem 0 1.5rem 0;
 letter-spacing: 0.05em;
 width: 100%;
 line-height: 1.2;
+/* Add animation here */
+animation: rotateY 3s infinite linear; /* Apply the animation */
+transform-style: preserve-3d; /* For 3D transformations */
 }
+
+/* Keyframes for vertical rotation */
+@keyframes rotateY {
+    0% {
+        transform: rotateY(0deg);
+    }
+    50% {
+        transform: rotateY(180deg);
+    }
+    100% {
+        transform: rotateY(360deg);
+    }
+}
+
 @keyframes fadeInUp {
 from { opacity: 0; transform: translateY(20px);}
 to { opacity: 1; transform: translateY(0);}
@@ -155,7 +186,6 @@ animation: blink 1.2s infinite both;
 }
 </style>
 """, unsafe_allow_html=True)
-
 # -------------------------------
 # Page Configuration
 # -------------------------------
