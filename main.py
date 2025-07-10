@@ -181,19 +181,12 @@ text-shadow:
 
 /* Main Chatbot Title Enhancement */
 .elegant-heading {{
-    font-size: 7.0rem; /* Bigger font size */
+    font-size: 6.0rem !important; /* Bigger font size */
     font-weight: 800;
     text-align: center;
     margin-top: -5px;
     color: #ffffff; /* White text color */
     animation: fadeInUp 2.0s ease-out;
-    /* Red Glow for the main title */
-    text-shadow:
-        0 0 2px #e53935, /* Soft inner glow */
-        0 0 4px #e53935,
-        0 0 6px #e53935,
-        0 0 8px #e53935,
-        0 0 10px #e53935; /* Stronger outer glow */
 }}
 
 
