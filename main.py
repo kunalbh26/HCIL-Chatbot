@@ -149,7 +149,7 @@ html, body {
 }
 .quick-reply {
 display: inline-block !important;
-background: #fff;
+background: #ffffff;
 color: #e53935;
 border-radius: 18px;
 padding: 0.5rem 1.1rem;
@@ -439,12 +439,12 @@ else:
         
         # Quick Replies
         st.markdown('<div style="margin-bottom:3rem;">', unsafe_allow_html=True)
-        if st.session_state.show_quick_replies:
+      /*   if st.session_state.show_quick_replies:  */
             for reply in st.session_state.quick_replies:
                 if st.button(reply, key=f"quick_{reply}"):
                     st.session_state.messages.append({"role": "user", "content": reply})
                     st.session_state.show_typing = True
-                    st.session_state.show_quick_replies = False
+              /*      st.session_state.show_quick_replies = False   */
                     st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
 
