@@ -122,7 +122,7 @@ color: #fff;
 }
 .sidebar-title {
 font-size: 4.5rem;
-color: #ff0000;
+color: #EE4B2B;
 font-weight: 900;
 text-align: center;
 margin: 0.5rem 0 1.5rem 0;
@@ -306,11 +306,11 @@ if 'show_typing' not in st.session_state:
 st.markdown("""
 <style>
 .gradient-text {
-    font-size: 2.8rem;
+    font-size: 3.5rem;
     font-weight: 900;
     text-align: center;
-    margin-top: -10px;
-    background: linear-gradient(90deg, #ff0000, #e53935, #b71c1c);
+    margin-top: -05px;
+    color: #EE4B2B;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     animation: fadeIn 2s ease-in-out;
