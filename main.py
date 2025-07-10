@@ -479,13 +479,14 @@ else:
 
         # Quick replies - show only at the beginning
         if st.session_state.show_quick_replies:
-            cols = st.columns(len(st.session_state.quick_replies))
-            for i, reply in enumerate(st.session_state.quick_replies):
-                if cols[i].button(reply, key=f"quick_reply_{reply}"):
-                    st.session_state.messages.append({"role": "user", "content": reply})
-                    st.session_state.show_typing = True
-                    st.session_state.show_quick_replies = False
-                    st.rerun()
+           st.markdown("**Quick help topics:**")
+           for reply in st.session_state.quick_replies:
+              if st.button(reply, key=f"quick_reply_{reply}"):
+                 st.session_state.messages.append({"role": "user", "content": reply})
+                 st.session_state.show_typing = True
+                 st.session_state.show_quick_replies = False
+                 st.rerun()
+
 
         # Bot response logic
         if st.session_state.get("show_typing", False):
@@ -502,57 +503,79 @@ else:
     else:
         st.info("Attempting to load knowledge base... If this message persists, check the 'KNOWLEDGE_BASE_PATH' in the code and ensure the file exists.")
 
-# FIXED: Floating Input Bar and Feedback (ChatGPT/Gemini Style)
+# FIXED: Floating Input Bar and Feedback (Gemini-style, Clean Layout)
+
 if st.session_state.chat_started and not st.session_state.chat_ended:
 
-    # Floating input bar
-    st.markdown('<div class="fixed-input-wrapper">', unsafe_allow_html=True)
-    with st.form("chat_input_form", clear_on_submit=True):
-        col1, col2 = st.columns([5, 1])
-        with col1:
-            user_input = st.text_input(
-                "user_input",
-                placeholder="Type your message here...",
-                key="input_bar",
-                label_visibility="collapsed"
-            )
-        with col2:
-            send_clicked = st.form_submit_button("▶")
+    # Spacing for chat area to avoid being hidden by fixed bar
+    st.markdown("<br><br><br>", unsafe_allow_html=True)
 
-        if send_clicked and user_input.strip():
-            user_input_clean = user_input.lower().strip()
-            st.session_state.messages.append({"role": "user", "content": user_input})
+    # Minimal Feedback Section (ABOVE input bar)
+    if st.session_state.feedback_request:
+        st.markdown("---")
+        st.write("Was this helpful?")
+        col1, col2, col3, col4 = st.columns(4)
+        if col1.button("👍", key="fb_like"):
+            st.session_state.messages.append({"role": "bot", "content": "Great! Let me know if there's anything else I can help with."})
+            st.session_state.feedback_request = False
+            st.rerun()
+        if col2.button("👎", key="fb_dislike"):
+            st.session_state.messages.append({"role": "bot", "content": "Sorry about that. Could you rephrase your question?"})
+            st.session_state.feedback_request = False
+            st.rerun()
+        if col3.button("🤔", key="fb_confused"):
+            st.session_state.messages.append({"role": "bot", "content": "I'm here to help! Try asking in a different way."})
+            st.session_state.feedback_request = False
+            st.rerun()
+        if col4.button("❤️", key="fb_love"):
+            st.session_state.messages.append({"role": "bot", "content": "Thanks for the love! 😊"})
+            st.session_state.feedback_request = False
+            st.rerun()
 
-            if user_input_clean in ["bye", "end", "quit"]:
-                st.session_state.messages.append({"role": "bot", "content": "Thank you for chatting, <b><span style='font-size:1.2em;color:#ffff;'>Mata Ne!</span></b> (see you later) 👋"})
-                st.session_state.chat_ended = True
-                st.session_state.feedback_request = False
-                st.session_state.show_typing = False
-                st.rerun()
-            else:
-                st.session_state.show_typing = True
-                st.session_state.show_quick_replies = False
-                st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
-    
-    # Place feedback section right above the input bar, inside the main chat flow
-    if st.session_state.feedback_request:
-        st.markdown("---")
-        st.write("Was this helpful?")
-        col1, col2, col3, col4 = st.columns(4)
-        if col1.button("👍", use_container_width=True, key="feedback_like"):
-            st.session_state.messages.append({"role": "bot", "content": "Great! Let me know if there is something else that I can help you with."})
-            st.session_state.feedback_request = False
-            st.rerun()
-        if col2.button("👎", use_container_width=True, key="feedback_dislike"):
-            st.session_state.messages.append({"role": "bot", "content": "I apologize. Could you please rephrase your question?"})
-            st.session_state.feedback_request = False
-            st.rerun()
-        if col3.button("🤔", use_container_width=True, key="feedback_confused"):
-            st.session_state.messages.append({"role": "bot", "content": "I'm here to help! Feel free to ask another question."})
-            st.session_state.feedback_request = False
-            st.rerun()
-        if col4.button("❤️", use_container_width=True, key="feedback_love"):
-            st.session_state.messages.append({"role": "bot", "content": "Thank you for your feedback! 😊"})
-            st.session_state.feedback_request = False
-            st.rerun()
+    # Gemini-style fixed center input bar
+    st.markdown("""
+    <style>
+    .gemini-input-wrapper {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: #1F1F1F;
+        padding: 1rem 0.5rem;
+        border-top: 1px solid #444;
+        z-index: 999;
+    }
+    .gemini-form {
+        max-width: 720px;
+        margin: 0 auto;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    st.markdown('<div class="gemini-input-wrapper"><div class="gemini-form">', unsafe_allow_html=True)
+    with st.form("chat_input_form", clear_on_submit=True):
+        col1, col2 = st.columns([6, 1])
+        with col1:
+            user_input = st.text_input(
+                "Your message...",
+                key="input_bar",
+                label_visibility="collapsed"
+            )
+        with col2:
+            send_clicked = st.form_submit_button("▶")
+
+        if send_clicked and user_input.strip():
+            user_input_clean = user_input.lower().strip()
+            st.session_state.messages.append({"role": "user", "content": user_input})
+
+            if user_input_clean in ["bye", "end", "quit"]:
+                st.session_state.messages.append({"role": "bot", "content": "Thank you for chatting, <b><span style='font-size:1.2em;color:#ffff;'>Mata Ne!</span></b> 👋"})
+                st.session_state.chat_ended = True
+                st.session_state.feedback_request = False
+                st.session_state.show_typing = False
+                st.rerun()
+            else:
+                st.session_state.show_typing = True
+                st.session_state.show_quick_replies = False
+                st.rerun()
+    st.markdown('</div></div>', unsafe_allow_html=True)
