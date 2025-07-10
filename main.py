@@ -13,6 +13,11 @@ from fuzzywuzzy import process
 # -------------------------------
 st.markdown("""
 <style>
+/* 💡 OVERRIDE Streamlit's default light/dark theming behavior */
+html, body, .main {
+    background-color: #323232 !important;
+    color: white !important;
+}
 body {
 background: #323232;
 }
@@ -306,11 +311,11 @@ if 'show_typing' not in st.session_state:
 st.markdown("""
 <style>
 .elegant-heading {
-    font-size: 3.2rem;
+    font-size: 4.5rem;
     font-weight: 800;
     text-align: center;
     margin-top: -5px;
-    color: #EE4B2B;
+    color: #ffffff;
     animation: fadeInUp 1.6s ease-out;
 }
 
