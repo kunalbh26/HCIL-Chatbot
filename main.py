@@ -19,10 +19,10 @@ html, body, .main {
     color: white !important;
 }
 body {
-background: #323232;
+background: #000000;
 }
 .main {
-background: transparent;
+background: #000000;
 border-radius: 0px;
 padding: 3.5rem !important;
 max-width: 640px;
