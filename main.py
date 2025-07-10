@@ -148,7 +148,7 @@ html, body {
     border: 1.5px solid #ff00;
 }
 .quick-reply {
-display: inline-block;
+display: inline-block !important;
 background: #fff;
 color: #e53935;
 border-radius: 18px;
