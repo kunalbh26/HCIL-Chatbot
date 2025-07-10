@@ -15,7 +15,7 @@ st.markdown("""
 <style>
 /* 💡 OVERRIDE Streamlit's default light/dark theming behavior */
 html, body, .main {
-    background-color: #323232 !important;
+    background-color: transparent !important;
     color: white !important;
 }
 body {
@@ -311,7 +311,7 @@ if 'show_typing' not in st.session_state:
 st.markdown("""
 <style>
 .elegant-heading {
-    font-size: 4.5rem;
+    font-size: 5.0rem;
     font-weight: 800;
     text-align: center;
     margin-top: -5px;
