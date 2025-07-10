@@ -302,7 +302,28 @@ if 'quick_replies' not in st.session_state:
 if 'show_typing' not in st.session_state:
     st.session_state['show_typing'] = False
 
-st.markdown("<h1 style='color:red; text-align:center; margin-top: -10px;'>🤖 HCIL IT Helpdesk Chatbot</h1>", unsafe_allow_html=True)
+
+st.markdown("""
+<style>
+.gradient-text {
+    font-size: 2.8rem;
+    font-weight: 900;
+    text-align: center;
+    margin-top: -10px;
+    background: linear-gradient(90deg, #ff0000, #e53935, #b71c1c);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: fadeIn 2s ease-in-out;
+}
+
+@keyframes fadeIn {
+    0% {opacity: 0; transform: translateY(-10px);}
+    100% {opacity: 1; transform: translateY(0);}
+}
+</style>
+
+<h1 class='gradient-text'>🤖 HCIL IT Helpdesk Chatbot</h1>
+""", unsafe_allow_html=True)
 st.markdown('<div class="main">', unsafe_allow_html=True)
 
 # Handle knowledge base upload
@@ -332,7 +353,7 @@ if uploaded_file is not None and not st.session_state.knowledge_base_loaded:
 if st.session_state.knowledge_base_loaded and not st.session_state.messages:
     st.session_state.messages.append({
         "role": "bot",
-        "content": "👋 <b><span style='font-size:1.2em;color:#ffff;'>Konnichiwa!</span></b> How can I help you today?"
+        "content": "👋 <b><span style='font-size:1.0em;color:#ffff;'>Konnichiwa!</span></b> How can I help you today?"
     })
 
 # Main chat interface logic
