@@ -305,25 +305,24 @@ if 'show_typing' not in st.session_state:
 
 st.markdown("""
 <style>
-.gradient-text {
-    font-size: 3.5rem;
-    font-weight: 900;
+.elegant-heading {
+    font-size: 3.2rem;
+    font-weight: 800;
     text-align: center;
-    margin-top: -05px;
+    margin-top: -5px;
     color: #EE4B2B;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: fadeIn 2s ease-in-out;
+    animation: fadeInUp 1.6s ease-out;
 }
 
-@keyframes fadeIn {
-    0% {opacity: 0; transform: translateY(-10px);}
-    100% {opacity: 1; transform: translateY(0);}
+@keyframes fadeInUp {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
 }
 </style>
 
-<h1 class='gradient-text'>🤖 HCIL IT Helpdesk Chatbot</h1>
+<h1 class='elegant-heading'>🤖 HCIL IT Helpdesk Chatbot</h1>
 """, unsafe_allow_html=True)
+
 st.markdown('<div class="main">', unsafe_allow_html=True)
 
 # Handle knowledge base upload
