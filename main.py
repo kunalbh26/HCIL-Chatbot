@@ -30,7 +30,7 @@ html, body, .stApp {{
     border-radius: 0px;
     padding: 3.5rem !important;
     max-width: 640px;
-    margin: 2.5rem auto;
+    margin: 2.0rem auto;
 }}
 
 /* Sidebar Background */
@@ -93,7 +93,7 @@ align-items: center;
 padding: 0.3rem 0.8rem;
 }}
 .input-bar input {{
-background: transparent;
+background: #323232;
 border: 2px solid #ff0000;
 color: #fff;
 width: 100%;
@@ -181,7 +181,7 @@ text-shadow:
 
 /* Main Chatbot Title Enhancement */
 .elegant-heading {{
-    font-size: 6.0rem !important; /* Bigger font size */
+    font-size: 5.0rem !important; /* Bigger font size */
     font-weight: 800;
     text-align: center;
     margin-top: -5px;
