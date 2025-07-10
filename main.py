@@ -36,6 +36,7 @@ html, body, .stApp {{
 /* Sidebar Background */
 .stSidebar > div:first-child {{
     background-color: #323232 !important; /* Darker Gray for Sidebar */
+    border-right: 2px solid white; /* Added white border to the right */
 }}
 
 /* Chat bubbles and avatars - unchanged */
@@ -152,7 +153,7 @@ animation: rotate3D 5s infinite linear; /* Slower, more impactful rotation */
 transform-style: preserve-3d;
 perspective: 800px; /* Adds perspective for 3D effect */
 /* Optional: text shadow for more depth, subtle glow */
-text-shadow: 
+text-shadow:
     0 0 5px rgba(238, 75, 43, 0.5), /* Red glow */
     0 0 10px rgba(238, 75, 43, 0.4),
     0 0 15px rgba(238, 75, 43, 0.3),
@@ -191,8 +192,8 @@ text-shadow:
 
 
 @keyframes fadeInUp {{
-    0% {{ opacity: 0; transform: translateY(20px); }}
-    100% {{ opacity: 1; transform: translateY(0); }}
+    0% {{ opacity: 0; transform: translateY(20px); }}
+    100% {{ opacity: 1; transform: translateY(0); }}
 }}
 .typing-indicator {{
 display: flex; align-items: center; margin-bottom: 1.1rem;
@@ -207,6 +208,29 @@ animation: blink 1.2s infinite both;
 @keyframes blink {{
 0%, 80%, 100% {{ opacity: 0.2; }}
 40% {{ opacity: 1; }}
+}}
+
+/* New style for the "Start Chat" button */
+.start-chat-button-style {{
+    background: linear-gradient(90deg, #e53935 0%, #b71c1c 100%);
+    color: #fff;
+    border: 2px solid #fff;
+    border-radius: 20px; /* Rounded corners like a bubble */
+    padding: 1rem 2rem;
+    font-size: 1.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    display: block; /* Make it a block element to center it */
+    margin: 3rem auto; /* Center the button */
+    width: fit-content; /* Adjust width to content */
+    text-align: center;
+    transition: background 0.2s, color 0.2s, transform 0.2s;
+}}
+.start-chat-button-style:hover {{
+    background: #fff;
+    color: #e53935;
+    border: 2px solid #e53935;
+    transform: scale(1.05);
 }}
 </style>
 """, unsafe_allow_html=True)
@@ -337,7 +361,7 @@ def render_chat(messages):
                 </div>
                 """, unsafe_allow_html=True
             )
-        else:  # bot
+        else: # bot
             st.markdown(
                 f"""
                 <div class="bot-row">
@@ -382,6 +406,8 @@ if 'quick_replies' not in st.session_state:
     st.session_state['quick_replies'] = ["Reset password", "VPN issues", "Software install"]
 if 'show_typing' not in st.session_state:
     st.session_state['show_typing'] = False
+if 'chat_started' not in st.session_state: # New session state for controlling chat start
+    st.session_state['chat_started'] = False
 
 
 st.markdown("""
@@ -390,17 +416,34 @@ st.markdown("""
 
 st.markdown('<div class="main">', unsafe_allow_html=True)
 
+# Conditional rendering based on chat_started
+if not st.session_state.chat_started and st.session_state.get('knowledge_base_loaded', False):
+    # Display the "Start Chat" button
+    start_chat_button = st.markdown(
+        """
+        <button class="start-chat-button-style" onclick="document.getElementById('start_chat_button_id').click();">Start Chat</button>
+        <script>
+            // This script helps to trigger the Streamlit button click programmatically
+            const button = document.querySelector('.start-chat-button-style');
+            if (button) {
+                button.setAttribute('id', 'start_chat_button_id');
+            }
+        </script>
+        """,
+        unsafe_allow_html=True
+    )
+    if st.button("Start Chat", key="start_chat_actual_button", type="secondary", help="Click to begin chat", use_container_width=False):
+        st.session_state.chat_started = True
+        st.rerun()
 
-# Display initial greeting if chat hasn't started
-# This will now always run after the KB is confirmed loaded
-if not st.session_state.messages and st.session_state.get('knowledge_base_loaded', False):
-    st.session_state.messages.append({
-        "role": "bot",
-        "content": "👋 <b><span style='font-size:1.0em;color:#ffff;'>Konnichiwa!</span></b> How can I help you today?"
-    })
+elif st.session_state.get('knowledge_base_loaded', False): # Only proceed if KB is loaded and chat has started
+    # Display initial greeting if chat hasn't started and messages are empty
+    if not st.session_state.messages:
+        st.session_state.messages.append({
+            "role": "bot",
+            "content": "👋 <b><span style='font-size:1.0em;color:#ffff;'>Konnichiwa!</span></b> How can I help you today?"
+        })
 
-# Main chat interface logic
-if st.session_state.get('knowledge_base_loaded', False): # Only proceed if KB is loaded
     render_chat(st.session_state.messages)
 
     # *** FIX 1: CHAT RESET LOGIC ***
@@ -411,6 +454,7 @@ if st.session_state.get('knowledge_base_loaded', False): # Only proceed if KB is
         st.session_state.chat_ended = False
         st.session_state.feedback_request = False
         st.session_state.show_typing = False
+        st.session_state.chat_started = False # Reset chat_started to show the button again
         st.rerun()
 
     if st.session_state.get("show_typing", False):
