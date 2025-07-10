@@ -262,3 +262,265 @@ model = load_sentence_transformer()
 # --- Pre-load Knowledge Base ---
 @st.cache_resource
 def load_knowledge_base(path):
+    try:
+        df = pd.read_excel(path)
+        required_columns = {'questions', 'answers', 'categories', 'tags'}
+        if not required_columns.issubset(df.columns):
+            st.error(f"❌ **Error:** The knowledge base file '{path}' is missing required columns: `questions`, `answers`, `categories`, `tags`.")
+            st.stop() # Stop the app if columns are missing
+        embeddings = model.encode(df['questions'].tolist())
+        nn_model = NearestNeighbors(n_neighbors=1, metric='cosine')
+        nn_model.fit(np.array(embeddings))
+        return df, nn_model
+    except FileNotFoundError:
+        st.error(f"❌ **Error:** Knowledge base file not found at '{path}'. Please ensure it's in the correct directory.")
+        st.stop() # Stop the app if file is not found
+    except Exception as e:
+        st.error(f"❌ An error occurred while loading the knowledge base: {e}")
+        st.stop()
+
+# Load the knowledge base globally when the app starts
+if 'df' not in st.session_state or 'nn_model' not in st.session_state:
+    st.session_state.df, st.session_state.nn_model = load_knowledge_base(KNOWLEDGE_BASE_PATH)
+    st.session_state.knowledge_base_loaded = True # Set to True once loaded
+
+# -------------------------------
+# Helper Functions (Unchanged)
+# -------------------------------
+def is_gibberish(text):
+    text = text.strip()
+    if len(text) < 2:
+        return True
+    if re.fullmatch(r'[^\w\s]+', text):
+        return True
+    if len(set(text)) < 3:
+        return True
+    words = text.split()
+    if len(words) > 0 and sum(1 for w in words if not w.isalpha()) / len(words) > 0.5:
+        return True
+    return False
+
+def is_greeting(text):
+    greetings = [
+        "hello", "hi", "hey", "greetings", "good morning", "good afternoon", "good evening",
+        "how are you", "what's up", "sup", "thank you", "thanks", "bye", "goodbye"
+    ]
+    text = text.lower()
+    for greet in greetings:
+        if fuzz.partial_ratio(greet, text) > 80:
+            return greet
+    return None
+
+def get_greeting_response(greet):
+    responses = {
+        "hello": "Hello! 👋 How can I help you today?",
+        "hi": "Hi there! How can I assist you?",
+        "hey": "Hey! How can I help you?",
+        "greetings": "Greetings! How can I help you?",
+        "good morning": "Good morning! ☀️ How can I help?",
+        "good afternoon": "Good afternoon! How can I help?",
+        "good evening": "Good evening! How can I help?",
+        "how are you": "I'm just a bot, but I'm here to help you! 😊",
+        "what's up": "I'm here to help with your IT queries!",
+        "sup": "All good! How can I assist you?",
+        "thank you": "You're welcome! Let me know if you have more questions.",
+        "thanks": "You're welcome!",
+        "bye": "Thank you for chatting, **Mata Ne!** (see you later) 👋",
+        "goodbye": "Thank you for chatting, **Mata Ne!** (see you later) 👋"
+    }
+    return responses.get(greet, "Hello! How can I help you?")
+
+def get_bot_response(user_query, df, nn_model, model):
+    if is_gibberish(user_query):
+        return "I'm sorry, I couldn't understand that. Could you please rephrase your question?"
+    
+    greet = is_greeting(user_query)
+    if greet:
+        return get_greeting_response(greet)
+        
+    questions = df['questions'].tolist()
+    best_match, score = process.extractOne(user_query, questions, scorer=fuzz.token_sort_ratio)
+    
+    if score > 70:
+        idx = questions.index(best_match)
+        return df.iloc[idx]['answers']
+        
+    query_embed = model.encode([user_query])
+    distances, indices = nn_model.kneighbors(query_embed)
+    best_idx = indices[0][0]
+    
+    if distances[0][0] > 0.45:
+        return "I'm sorry, I couldn't understand that. Could you please rephrase your question?"
+        
+    response = df.iloc[best_idx]['answers']
+    return response
+
+def render_chat(messages):
+    for message in messages:
+        if message["role"] == "user":
+            st.markdown(
+                f"""
+                <div class="user-row">
+                    <div class="chat-bubble user-bubble">{message['content']}</div>
+                    <div class="avatar" style="margin-left:8px;">🧑‍💻</div>
+                </div>
+                """, unsafe_allow_html=True
+            )
+        else: # bot
+            st.markdown(
+                f"""
+                <div class="bot-row">
+                    <div class="avatar" style="margin-right:8px;">🤖</div>
+                    <div class="chat-bubble bot-bubble">{message['content']}</div>
+                </div>
+                """, unsafe_allow_html=True
+            )
+
+def show_typing():
+    st.markdown("""
+    <div class="typing-indicator">
+        <div class="avatar" style="margin-right:8px;">🤖</div>
+        <div class="typing-dots">
+            <span></span><span></span><span></span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+# -------------------------------
+# Sidebar Configuration (Modified)
+# -------------------------------
+with st.sidebar:
+    st.markdown('<div class="sidebar-title">HCIL</div>', unsafe_allow_html=True)
+    # Removed the file uploader section here
+
+    st.info("Say 'bye', 'quit', or 'end' to close our chat.")
+
+# -------------------------------
+# Main Application Logic
+# -------------------------------
+# Initialize session state variables at the top
+if 'knowledge_base_loaded' not in st.session_state:
+    st.session_state['knowledge_base_loaded'] = False # This will be set to True by load_knowledge_base
+if 'messages' not in st.session_state:
+    st.session_state['messages'] = []
+if 'chat_ended' not in st.session_state:
+    st.session_state['chat_ended'] = False
+if 'feedback_request' not in st.session_state:
+    st.session_state['feedback_request'] = False
+if 'quick_replies' not in st.session_state:
+    st.session_state['quick_replies'] = ["Reset password", "VPN issues", "Software install"]
+if 'show_typing' not in st.session_state:
+    st.session_state['show_typing'] = False
+if 'chat_started' not in st.session_state: # New session state for controlling chat start
+    st.session_state['chat_started'] = False
+
+
+st.markdown("""
+<h1 class='elegant-heading'>🤖 HCIL IT Helpdesk Chatbot</h1>
+""", unsafe_allow_html=True)
+
+st.markdown('<div class="main">', unsafe_allow_html=True)
+
+# Conditional rendering based on chat_started
+if not st.session_state.chat_started and st.session_state.get('knowledge_base_loaded', False):
+    # This is the *only* button definition for "Start Chat"
+    if st.button("Start Chat", key="start_chat_button"):
+        st.session_state.chat_started = True
+        st.rerun()
+
+elif st.session_state.get('knowledge_base_loaded', False): # Only proceed if KB is loaded and chat has started
+    # Display initial greeting if chat hasn't started and messages are empty
+    if not st.session_state.messages:
+        st.session_state.messages.append({
+            "role": "bot",
+            "content": "👋 <b><span style='font-size:1.0em;color:#ffff;'>Konnichiwa!</span></b> How can I help you today?"
+        })
+
+    render_chat(st.session_state.messages)
+
+    # *** FIX 1: CHAT RESET LOGIC ***
+    # If the chat has ended, wait 2 seconds, then reset the state and rerun.
+    if st.session_state.chat_ended:
+        time.sleep(2)
+        st.session_state.messages = []
+        st.session_state.chat_ended = False
+        st.session_state.feedback_request = False
+        st.session_state.show_typing = False
+        st.session_state.chat_started = False # Reset chat_started to show the button again
+        st.rerun()
+
+    if st.session_state.get("show_typing", False):
+        show_typing()
+    
+    # *** FIX 2: VERTICAL QUICK REPLIES ***
+    st.markdown('<div style="margin-bottom:3rem;">', unsafe_allow_html=True)
+    for reply in st.session_state.quick_replies:
+        # Use a consistent key for buttons to avoid Streamlit warnings
+        if st.button(reply, key=f"quick_reply_{reply}"):
+            st.session_state.messages.append({"role": "user", "content": reply})
+            st.session_state.show_typing = True
+            st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # Feedback Reactions
+    if st.session_state.feedback_request:
+        st.markdown("#### Was this helpful?")
+        col1, col2, col3, col4 = st.columns(4)
+        # Unique keys for feedback buttons
+        if col1.button("👍", use_container_width=True, key="feedback_like"):
+            st.session_state.messages.append({"role": "bot", "content": "Great! Let me know if there is something else that I can help you with."})
+            st.session_state.feedback_request = False
+            st.rerun()
+        if col2.button("👎", use_container_width=True, key="feedback_dislike"):
+            st.session_state.messages.append({"role": "bot", "content": "I apologize. Could you please rephrase your question?"})
+            st.session_state.feedback_request = False
+            st.rerun()
+        if col3.button("🤔", use_container_width=True, key="feedback_confused"):
+            st.session_state.messages.append({"role": "bot", "content": "I'm here to help! Feel free to ask another question."})
+            st.session_state.feedback_request = False
+            st.rerun()
+        if col4.button("❤️", use_container_width=True, key="feedback_love"):
+            st.session_state.messages.append({"role": "bot", "content": "Thank you for your feedback! 😊"})
+            st.session_state.feedback_request = False
+            st.rerun()
+
+    # Input Bar
+    if not st.session_state.chat_ended:
+        with st.form("chat_input_form", clear_on_submit=True):
+            col1, col2 = st.columns([6, 1])
+            with col1:
+                user_input = st.text_input("user_input", placeholder="Type here...", key="input_bar", label_visibility="collapsed")
+            with col2:
+                send_clicked = st.form_submit_button("Send")
+
+            if send_clicked and user_input.strip():
+                user_input_clean = user_input.lower().strip()
+
+                st.session_state.messages.append({"role": "user", "content": user_input})
+
+                if user_input_clean in ["bye", "end", "quit"]:
+                    st.session_state.messages.append({"role": "bot", "content": "Thank you for chatting, <b><span style='font-size:1.2em;color:#ffff;'>Mata Ne!</span></b> (see you later) 👋"})
+                    st.session_state.chat_ended = True
+                    st.session_state.feedback_request = False
+                    st.session_state.show_typing = False
+                    st.rerun()
+                else:
+                    st.session_state.show_typing = True
+                    st.rerun()
+
+    # Bot response logic
+    if st.session_state.get("show_typing", False):
+        time.sleep(1.2)
+        last_user_message = next((msg["content"] for msg in reversed(st.session_state.messages) if msg["role"] == "user"), None)
+
+        if last_user_message:
+            bot_response = get_bot_response(last_user_message, st.session_state.df, st.session_state.nn_model, model)
+            st.session_state.messages.append({"role": "bot", "content": bot_response})
+            st.session_state.feedback_request = True
+            st.session_state.show_typing = False
+            st.rerun()
+else:
+    # This message should ideally not be seen if the KB loads correctly
+    st.info("Attempting to load knowledge base... If this message persists, check the 'KNOWLEDGE_BASE_PATH' in the code and ensure the file exists.")
+
+st.markdown('</div>', unsafe_allow_html=True)
