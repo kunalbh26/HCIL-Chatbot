@@ -1,0 +1,1 @@
+sed -i 's/\xc2\xa0/ /g' main.py
