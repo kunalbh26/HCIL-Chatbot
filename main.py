@@ -1,12 +1,3 @@
-import streamlit as st
-import pandas as pd
-import numpy as np
-from sentence_transformers import SentenceTransformer
-from sklearn.neighbors import NearestNeighbors
-import time
-import re
-from fuzzywuzzy import fuzz
-from fuzzywuzzy import process
 
 import streamlit as st
 import pandas as pd
@@ -25,18 +16,18 @@ st.markdown("""
 <style>
 /* Ensure the very root HTML and body are black */
 html, body {
-    background-color: #323232 !important; /* Strict background color */
+    background-color: #000000 !important; /* Strict background color */
     color: white !important;
 }
 
 /* Target Streamlit's main content area */
 .stApp {
-    background-color: #323232 !important; /* Strict background color for the app container */
+    background-color: #000000 !important; /* Strict background color for the app container */
 }
 
 /* Your existing .main style, updated to the desired background */
 .main {
-    background: #323232; /* Use your desired dark background here */
+    background: #000000; /* Use your desired dark background here */
     border-radius: 0px;
     padding: 3.5rem !important;
     max-width: 640px;
