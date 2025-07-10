@@ -9,254 +9,282 @@ from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
 
 # --- Configuration for Pre-loaded Knowledge Base ---
-# IMPORTANT: Place your 'knowledge_base.xlsx' file in the same directory as this script,
-# or provide the correct path (e.g., 'data/knowledge_base.xlsx').
 KNOWLEDGE_BASE_PATH = 'dataset.xlsx'
 
 # -------------------------------
-# Custom CSS for Red-Black-White Theme (Modified for strict background, animations, and new styles)
+# Custom CSS for Red-Black-White Theme (Fixed Input Bar and Button Positioning)
 # -------------------------------
 st.markdown(f"""
 <style>
 /* Strict Background Color for the entire app */
 html, body, .stApp {{
-    background-color: #1F1F1F !important; /* Dark Gray Background */
+    background-color: #1F1F1F !important;
     color: white !important;
 }}
 
-/* Main Chat Area Background 
+/* Main Chat Area Background - Fixed bottom padding */
 .main {{
-    background: #1F1F1F; /* Match the strict background */
+    background: #1F1F1F;
     border-radius: 0px;
     padding: 3.5rem !important;
     max-width: 640px;
     margin: 2.0rem auto;
-    padding-bottom: 200px !important; /* Add space for fixed input bar */
-}}   */
-
-/* ### MODIFICATION 3: Added a white border to the right of the sidebar ### */
-.stSidebar > div:first-child {{
-    background-color: #323232 !important; /* Darker Gray for Sidebar */
-    border-right: 2px solid #ffffff !important; /* White line separator */
+    padding-bottom: 150px !important; /* Space for fixed input bar */
 }}
 
-/* ### MODIFICATION 1: Enhanced CSS for the 'Start Chat' button ### */
-.start-chat-button-container {{
+/* Sidebar styling */
+.stSidebar > div:first-child {{
+    background-color: #323232 !important;
+    border-right: 2px solid white;
+}}
+
+/* FIXED: Start Chat Button - Proper Centering */
+.start-chat-container {{
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-top: 3rem;
-    margin-bottom: 2rem;
+    width: 100%;
+    margin: 3rem 0;
 }}
 
-.start-chat-button {{
-    background: linear-gradient(90deg, #e53935 0%, #b71c1c 100%);
-    color: #fff;
+.stButton > button {{
+    background: linear-gradient(90deg, #e53935 0%, #b71c1c 100%) !important;
+    color: #fff !important;
+    border-radius: 25px !important;
+    padding: 1.5rem 3rem !important;
+    font-size: 1.4rem !important;
+    border: 3px solid #fff !important;
+    font-weight: bold !important;
+    transition: transform 0.2s !important;
+    min-width: 200px !important;
+    margin: 0 auto !important;
+    display: block !important;
+}}
+
+.stButton > button:hover {{
+    transform: scale(1.08) !important;
+    color: #fff !important;
+    border: 3px solid #fff !important;
+}}
+
+/* FIXED: Floating Input Bar - ChatGPT/Gemini Style */
+.fixed-input-wrapper {{
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 600px;
+    z-index: 1000;
+    background: rgba(31, 31, 31, 0.95);
+    backdrop-filter: blur(10px);
     border-radius: 25px;
-    padding: 1.5rem 3rem;
-    cursor: pointer;
-    font-size: 1.4rem;
-    border: 3px solid #fff;
-    font-weight: bold;
-    transition: transform 0.2s;
-    min-width: 200px;
-    text-align: center;
+    padding: 15px;
+    border: 2px solid #e53935;
+    box-shadow: 0 4px 20px rgba(229, 57, 53, 0.3);
 }}
 
-.start-chat-button:hover {{
-    transform: scale(1.08);
+/* Style the input form within the fixed wrapper */
+.fixed-input-wrapper .stForm {{
+    margin: 0 !important;
 }}
 
-/* ### MODIFICATION 3: Fixed input bar and feedback buttons ### */
-.fixed-input-container {{
+.fixed-input-wrapper .stTextInput > div > div > input {{
+    background: #2a2a2a !important;
+    border: 2px solid #e53935 !important;
+    border-radius: 20px !important;
+    color: #fff !important;
+    padding: 12px 20px !important;
+    font-size: 16px !important;
+}}
+
+.fixed-input-wrapper .stTextInput > div > div > input:focus {{
+    border-color: #ff6b6b !important;
+    box-shadow: 0 0 0 2px rgba(229, 57, 53, 0.3) !important;
+}}
+
+/* Send button styling */
+.fixed-input-wrapper .stButton > button {{
+    background: linear-gradient(90deg, #e53935 0%, #b71c1c 100%) !important;
+    color: #fff !important;
+    border: none !important;
+    border-radius: 50% !important;
+    width: 45px !important;
+    height: 45px !important;
+    font-size: 18px !important;
+    min-width: 45px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}}
+
+.fixed-input-wrapper .stButton > button:hover {{
+    background: #fff !important;
+    color: #e53935 !important;
+    transform: scale(1.05) !important;
+}}
+
+/* FIXED: Feedback Buttons - Floating Above Input */
+.fixed-feedback-wrapper {{
     position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: #1F1F1F;
-    border-top: 2px solid #e53935;
-    padding: 1rem;
-    z-index: 1000;
-    max-width: 640px;
-    margin: 0 auto;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 600px;
+    z-index: 999;
+    background: rgba(31, 31, 31, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 15px;
+    border: 1px solid #e53935;
+    box-shadow: 0 4px 15px rgba(229, 57, 53, 0.2);
 }}
 
-.fixed-feedback-container {{
-    position: fixed;
-    bottom: 80px;
-    left: 0;
-    right: 0;
-    background: #1F1F1F;
-    padding: 1rem;
-    z-index: 1000;
-    max-width: 640px;
-    margin: 0 auto;
+.fixed-feedback-wrapper h4 {{
+    color: white !important;
+    text-align: center !important;
+    margin-bottom: 1rem !important;
+    font-size: 1.1rem !important;
 }}
 
-/* Chat bubbles and avatars - unchanged */
+.fixed-feedback-wrapper .stButton > button {{
+    background: rgba(229, 57, 53, 0.8) !important;
+    color: #fff !important;
+    border: 1px solid #fff !important;
+    border-radius: 10px !important;
+    padding: 8px 12px !important;
+    font-size: 1.2rem !important;
+    transition: all 0.2s !important;
+}}
+
+.fixed-feedback-wrapper .stButton > button:hover {{
+    background: #fff !important;
+    color: #e53935 !important;
+    transform: scale(1.1) !important;
+}}
+
+/* Chat bubbles and avatars */
 .chat-bubble {{
-padding: 1rem 1.5rem;
-border-radius: 20px;
-margin-bottom: 14px;
-max-width: 75%;
-animation: fadeInUp 0.3s;
-position: relative;
-word-break: break-word;
-font-size: 1.08rem;
-display: flex;
-align-items: center;
+    padding: 1rem 1.5rem;
+    border-radius: 20px;
+    margin-bottom: 14px;
+    max-width: 75%;
+    animation: fadeInUp 0.3s;
+    position: relative;
+    word-break: break-word;
+    font-size: 1.08rem;
+    display: flex;
+    align-items: center;
 }}
 
 .user-bubble {{
-background: #fff;
-color: #111;
-align-self: flex-end;
-margin-left: auto;
-margin-right: 0;
-border: 1.5px solid #e53935;
+    background: #fff;
+    color: #111;
+    align-self: flex-end;
+    margin-left: auto;
+    margin-right: 0;
+    border: 1.5px solid #e53935;
 }}
 
 .bot-bubble {{
-background: linear-gradient(90deg, #e53935 0%, #b71c1c 100%);
-color: #fff;
-align-self: flex-start;
-margin-right: auto;
-margin-left: 0;
-border: 1.5px solid #fff;
+    background: linear-gradient(90deg, #e53935 0%, #b71c1c 100%);
+    color: #fff;
+    align-self: flex-start;
+    margin-right: auto;
+    margin-left: 0;
+    border: 1.5px solid #fff;
 }}
 
 .avatar {{
-width: 38px; height: 38px; border-radius: 75%; margin: 0 10px;
-background: #3d3d3d;
-box-shadow: 0 2px 8px rgba(229,57,53,0.12);
-font-size: 1.7rem;
-text-align: center;
-line-height: 38px;
-border: 2px solid #ff0000;
-display: flex; align-items: center; justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 75%;
+    margin: 0 10px;
+    background: #3d3d3d;
+    box-shadow: 0 2px 8px rgba(229,57,53,0.12);
+    font-size: 1.7rem;
+    text-align: center;
+    line-height: 38px;
+    border: 2px solid #ff0000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }}
 
 .user-row {{
-display: flex; flex-direction: row; align-items: flex-end; justify-content: flex-end;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: flex-end;
 }}
 
 .bot-row {{
-display: flex; flex-direction: row; align-items: flex-end; justify-content: flex-start;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: flex-start;
 }}
 
-.input-bar {{
-background: #222;
-border-radius: 20px;
-box-shadow: 0 2px 8px rgba(229,57,53,0.12);
-margin-top: 0.5rem;
-display: flex;
-align-items: center;
-padding: 0.3rem 0.8rem;
-}}
-
-.input-bar input {{
-background: #323232;
-border: 2px solid #ff0000;
-color: #fff;
-width: 100%;
-padding: 0.7rem 0.8rem;
-outline: none;
-font-size: 1rem;
-}}
-
-.send-btn {{
-background: linear-gradient(90deg, #e53935 0%, #b71c1c 100%);
-color: #fff;
-border: none;
-border-radius: 50%;
-width: 38px;
-height: 38px;
-font-size: 1.2rem;
-cursor: pointer;
-margin-left: 8px;
-transition: background 0.2s;
-display: flex; align-items: center; justify-content: center;
-}}
-
-.send-btn:hover {{
-background: #fff;
-color: #e53935;
-border: 1.5px solid #ff00;
-}}
-
+/* Quick reply buttons */
 .quick-reply {{
-display: inline-block;
-background: #fff;
-color: #e53935;
-border-radius: 18px;
-padding: 0.5rem 1.1rem;
-margin: 0.15rem;
-cursor: pointer;
-font-size: 0.98rem;
-border: 1.5px solid #e53935;
-font-weight: 500;
-transition: background 0.2s, color 0.2s;
+    display: inline-block;
+    background: #fff;
+    color: #e53935;
+    border-radius: 18px;
+    padding: 0.5rem 1.1rem;
+    margin: 0.15rem;
+    cursor: pointer;
+    font-size: 0.98rem;
+    border: 1.5px solid #e53935;
+    font-weight: 500;
+    transition: background 0.2s, color 0.2s;
 }}
 
 .quick-reply:hover {{
-background: #e53935;
-color: #fff;
+    background: #e53935;
+    color: #fff;
 }}
 
-/* ### MODIFICATION 2: Quick reply container positioning ### */
 .quick-reply-container {{
-margin-top: 1rem;
-margin-bottom: 2rem;
+    margin-top: 1rem;
+    margin-bottom: 2rem;
 }}
 
 /* Enhanced Sidebar Title */
 .sidebar-title {{
-font-size: 5.5rem; /* Bigger font size */
-color: #EE4B2B; /* Keep original color or change as desired */
-font-weight: 900;
-text-align: center;
-margin: 0.5rem 0 1.5rem 0;
-letter-spacing: 0.05em;
-width: 100%;
-line-height: 1.2;
-/* 3D rotation animation */
-animation: rotate3D 5s infinite linear; /* Slower, more impactful rotation */
-transform-style: preserve-3d;
-perspective: 800px; /* Adds perspective for 3D effect */
-/* Optional: text shadow for more depth, subtle glow */
-text-shadow:
-    0 0 5px rgba(238, 75, 43, 0.5), /* Red glow */
-    0 0 10px rgba(238, 75, 43, 0.4),
-    0 0 15px rgba(238, 75, 43, 0.3),
-    1px 1px 2px rgba(0,0,0,0.8); /* Subtle shadow for depth */
+    font-size: 5.5rem;
+    color: #EE4B2B;
+    font-weight: 900;
+    text-align: center;
+    margin: 0.5rem 0 1.5rem 0;
+    letter-spacing: 0.05em;
+    width: 100%;
+    line-height: 1.2;
+    animation: rotate3D 5s infinite linear;
+    transform-style: preserve-3d;
+    perspective: 800px;
+    text-shadow:
+        0 0 5px rgba(238, 75, 43, 0.5),
+        0 0 10px rgba(238, 75, 43, 0.4),
+        0 0 15px rgba(238, 75, 43, 0.3),
+        1px 1px 2px rgba(0,0,0,0.8);
 }}
 
-/* Keyframes for a more 3D rotation */
 @keyframes rotate3D {{
-    0% {{
-        transform: rotateY(0deg) scale(1);
-    }}
-    25% {{
-        transform: rotateY(90deg) scale(1.05); /* Slight scale for emphasis */
-    }}
-    50% {{
-        transform: rotateY(180deg) scale(1);
-    }}
-    75% {{
-        transform: rotateY(270deg) scale(1.05);
-    }}
-    100% {{
-        transform: rotateY(360deg) scale(1);
-    }}
+    0% {{ transform: rotateY(0deg) scale(1); }}
+    25% {{ transform: rotateY(90deg) scale(1.05); }}
+    50% {{ transform: rotateY(180deg) scale(1); }}
+    75% {{ transform: rotateY(270deg) scale(1.05); }}
+    100% {{ transform: rotateY(360deg) scale(1); }}
 }}
 
 /* Main Chatbot Title Enhancement */
 .elegant-heading {{
-    font-size: 5.0rem !important; /* Bigger font size */
+    font-size: 5.0rem !important;
     font-weight: 800;
     text-align: center;
     margin-top: -5px;
-    color: #ffffff; /* White text color */
+    color: #ffffff;
     animation: fadeInUp 2.0s ease-out;
 }}
 
@@ -265,22 +293,29 @@ text-shadow:
     100% {{ opacity: 1; transform: translateY(0); }}
 }}
 
+/* Typing indicator */
 .typing-indicator {{
-display: flex; align-items: center; margin-bottom: 1.1rem;
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.1rem;
 }}
 
 .typing-dots span {{
-height: 10px; width: 10px; margin: 0 2px;
-background: #e53935; border-radius: 25%; display: inline-block;
-animation: blink 1.2s infinite both;
+    height: 10px;
+    width: 10px;
+    margin: 0 2px;
+    background: #e53935;
+    border-radius: 25%;
+    display: inline-block;
+    animation: blink 1.2s infinite both;
 }}
 
 .typing-dots span:nth-child(2) {{ animation-delay: 0.2s; }}
 .typing-dots span:nth-child(3) {{ animation-delay: 0.4s; }}
 
 @keyframes blink {{
-0%, 80%, 100% {{ opacity: 0.2; }}
-40% {{ opacity: 1; }}
+    0%, 80%, 100% {{ opacity: 0.2; }}
+    40% {{ opacity: 1; }}
 }}
 </style>
 """, unsafe_allow_html=True)
@@ -312,14 +347,14 @@ def load_knowledge_base(path):
         required_columns = {'questions', 'answers', 'categories', 'tags'}
         if not required_columns.issubset(df.columns):
             st.error(f"❌ **Error:** The knowledge base file '{path}' is missing required columns: `questions`, `answers`, `categories`, `tags`.")
-            st.stop() # Stop the app if columns are missing
+            st.stop()
         embeddings = model.encode(df['questions'].tolist())
         nn_model = NearestNeighbors(n_neighbors=1, metric='cosine')
         nn_model.fit(np.array(embeddings))
         return df, nn_model
     except FileNotFoundError:
         st.error(f"❌ **Error:** Knowledge base file not found at '{path}'. Please ensure it's in the correct directory.")
-        st.stop() # Stop the app if file is not found
+        st.stop()
     except Exception as e:
         st.error(f"❌ An error occurred while loading the knowledge base: {e}")
         st.stop()
@@ -327,10 +362,10 @@ def load_knowledge_base(path):
 # Load the knowledge base globally when the app starts
 if 'df' not in st.session_state or 'nn_model' not in st.session_state:
     st.session_state.df, st.session_state.nn_model = load_knowledge_base(KNOWLEDGE_BASE_PATH)
-    st.session_state.knowledge_base_loaded = True # Set to True once loaded
+    st.session_state.knowledge_base_loaded = True
 
 # -------------------------------
-# Helper Functions (Unchanged)
+# Helper Functions
 # -------------------------------
 def is_gibberish(text):
     text = text.strip()
@@ -411,7 +446,7 @@ def render_chat(messages):
                 </div>
                 """, unsafe_allow_html=True
             )
-        else:  # bot
+        else:
             st.markdown(
                 f"""
                 <div class="bot-row">
@@ -432,19 +467,18 @@ def show_typing():
     """, unsafe_allow_html=True)
 
 # -------------------------------
-# Sidebar Configuration (Modified)
+# Sidebar Configuration
 # -------------------------------
 with st.sidebar:
     st.markdown('<div class="sidebar-title">HCIL</div>', unsafe_allow_html=True)
-    # Removed the file uploader section here
     st.info("Say 'bye', 'quit', or 'end' to close our chat.")
 
 # -------------------------------
 # Main Application Logic
 # -------------------------------
-# Initialize session state variables at the top
+# Initialize session state variables
 if 'knowledge_base_loaded' not in st.session_state:
-    st.session_state['knowledge_base_loaded'] = False # This will be set to True by load_knowledge_base
+    st.session_state['knowledge_base_loaded'] = False
 if 'messages' not in st.session_state:
     st.session_state['messages'] = []
 if 'chat_ended' not in st.session_state:
@@ -455,10 +489,8 @@ if 'quick_replies' not in st.session_state:
     st.session_state['quick_replies'] = ["Reset password", "VPN issues", "Software install"]
 if 'show_typing' not in st.session_state:
     st.session_state['show_typing'] = False
-### MODIFICATION 1: New session state to control the start of the chat ###
 if 'chat_started' not in st.session_state:
     st.session_state['chat_started'] = False
-### MODIFICATION 2: New session state to control quick replies visibility ###
 if 'show_quick_replies' not in st.session_state:
     st.session_state['show_quick_replies'] = False
 
@@ -468,35 +500,9 @@ st.markdown("""
 
 st.markdown('<div class="main">', unsafe_allow_html=True)
 
-### MODIFICATION 1: Logic to show 'Start Chat' button or the chat interface ###
+# Start Chat Button Logic
 if not st.session_state.chat_started:
-    # Centered container for the button
-    st.markdown(
-        """
-        <div class="start-chat-button-container">
-            <style>
-                .stButton button {
-                    background: linear-gradient(90deg, #e53935 0%, #b71c1c 100%);
-                    color: #fff;
-                    border-radius: 25px;
-                    padding: 1.5rem 3rem;
-                    cursor: pointer;
-                    font-size: 1.4rem !important;
-                    border: 3px solid #fff;
-                    font-weight: bold;
-                    transition: transform 0.2s;
-                    min-width: 200px;
-                }
-                .stButton button:hover {
-                    transform: scale(1.08);
-                    color: #fff !important; /* Keep text color white on hover */
-                    border: 3px solid #fff !important;
-                }
-            </style>
-        """,
-        unsafe_allow_html=True
-    )
-
+    st.markdown('<div class="start-chat-container">', unsafe_allow_html=True)
     if st.button("Start Chat", key="start_chat"):
         st.session_state.chat_started = True
         st.session_state.show_quick_replies = True
@@ -505,37 +511,35 @@ if not st.session_state.chat_started:
             "content": "👋 <b><span style='font-size:1.0em;color:#ffff;'>Konnichiwa!</span></b> How can I help you today?"
         })
         st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
 
-else: # This block runs only after 'Start Chat' is clicked
-    # Main chat interface logic
-    if st.session_state.get('knowledge_base_loaded', False): # Only proceed if KB is loaded
+else:
+    # Main chat interface
+    if st.session_state.get('knowledge_base_loaded', False):
         render_chat(st.session_state.messages)
 
-        # *** FIX 1: CHAT RESET LOGIC ***
-        # If the chat has ended, wait 2 seconds, then reset the state and rerun.
+        # Chat reset logic
         if st.session_state.chat_ended:
             time.sleep(2)
-            # Reset all relevant states to start fresh
             st.session_state.messages = []
             st.session_state.chat_ended = False
             st.session_state.feedback_request = False
             st.session_state.show_typing = False
-            st.session_state.chat_started = False # Reset to show start button again
+            st.session_state.chat_started = False
             st.session_state.show_quick_replies = False
             st.rerun()
 
         if st.session_state.get("show_typing", False):
             show_typing()
 
-        # *** MODIFICATION 2: QUICK REPLIES - Show only at the beginning ***
+        # Quick replies - show only at the beginning
         if st.session_state.show_quick_replies and len(st.session_state.messages) == 1:
             st.markdown('<div class="quick-reply-container">', unsafe_allow_html=True)
             for reply in st.session_state.quick_replies:
-                # Use a consistent key for buttons to avoid Streamlit warnings
                 if st.button(reply, key=f"quick_reply_{reply}"):
                     st.session_state.messages.append({"role": "user", "content": reply})
                     st.session_state.show_typing = True
-                    st.session_state.show_quick_replies = False  # Hide quick replies after use
+                    st.session_state.show_quick_replies = False
                     st.rerun()
             st.markdown('</div>', unsafe_allow_html=True)
 
@@ -552,29 +556,20 @@ else: # This block runs only after 'Start Chat' is clicked
                 st.rerun()
 
     else:
-        # This message should ideally not be seen if the KB loads correctly
         st.info("Attempting to load knowledge base... If this message persists, check the 'KNOWLEDGE_BASE_PATH' in the code and ensure the file exists.")
 
 st.markdown('</div>', unsafe_allow_html=True)
 
-# *** MODIFICATION 3: FIXED INPUT BAR AND FEEDBACK BUTTONS ***
+# FIXED: Floating Input Bar and Feedback (ChatGPT/Gemini Style)
 if st.session_state.chat_started and not st.session_state.chat_ended:
-    # Fixed feedback buttons
+    # Floating feedback buttons
     if st.session_state.feedback_request:
-        st.markdown(
-            """
-            <div class="fixed-feedback-container">
-                <h4 style="color: white; text-align: center; margin-bottom: 1rem;">Was this helpful?</h4>
-            </div>
-            """, 
-            unsafe_allow_html=True
-        )
-        
-        # Create a container for the feedback buttons
-        feedback_container = st.container()
-        with feedback_container:
+        feedback_placeholder = st.empty()
+        with feedback_placeholder.container():
+            st.markdown('<div class="fixed-feedback-wrapper">', unsafe_allow_html=True)
+            st.markdown('<h4>Was this helpful?</h4>', unsafe_allow_html=True)
+            
             col1, col2, col3, col4 = st.columns(4)
-            # Unique keys for feedback buttons
             if col1.button("👍", use_container_width=True, key="feedback_like"):
                 st.session_state.messages.append({"role": "bot", "content": "Great! Let me know if there is something else that I can help you with."})
                 st.session_state.feedback_request = False
@@ -591,29 +586,23 @@ if st.session_state.chat_started and not st.session_state.chat_ended:
                 st.session_state.messages.append({"role": "bot", "content": "Thank you for your feedback! 😊"})
                 st.session_state.feedback_request = False
                 st.rerun()
+            
+            st.markdown('</div>', unsafe_allow_html=True)
 
-    # Fixed input bar
-    st.markdown(
-        """
-        <div class="fixed-input-container">
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-    
-    # Create the input form in a container
-    input_container = st.container()
-    with input_container:
+    # Floating input bar
+    input_placeholder = st.empty()
+    with input_placeholder.container():
+        st.markdown('<div class="fixed-input-wrapper">', unsafe_allow_html=True)
+        
         with st.form("chat_input_form", clear_on_submit=True):
-            col1, col2 = st.columns([6, 1])
+            col1, col2 = st.columns([5, 1])
             with col1:
-                user_input = st.text_input("user_input", placeholder="Type here...", key="input_bar", label_visibility="collapsed")
+                user_input = st.text_input("user_input", placeholder="Type your message here...", key="input_bar", label_visibility="collapsed")
             with col2:
-                send_clicked = st.form_submit_button("Send")
+                send_clicked = st.form_submit_button("▶")
 
             if send_clicked and user_input.strip():
                 user_input_clean = user_input.lower().strip()
-
                 st.session_state.messages.append({"role": "user", "content": user_input})
 
                 if user_input_clean in ["bye", "end", "quit"]:
@@ -624,5 +613,7 @@ if st.session_state.chat_started and not st.session_state.chat_ended:
                     st.rerun()
                 else:
                     st.session_state.show_typing = True
-                    st.session_state.show_quick_replies = False  # Hide quick replies after first user input
+                    st.session_state.show_quick_replies = False
                     st.rerun()
+        
+        st.markdown('</div>', unsafe_allow_html=True)
