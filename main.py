@@ -14,7 +14,7 @@ from fuzzywuzzy import process
 st.markdown("""
 <style>
 body {
-background: #323232;
+background: #000000;
 }
 .main {
 background: transparent;
