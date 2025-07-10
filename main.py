@@ -431,14 +431,14 @@ if not st.session_state.chat_started:
                     border-radius: 20px;
                     padding: 1rem 1.5rem;
                     cursor: pointer;
-                    font-size: 1.08rem;
+                    font-size: 1.2rem;
                     border: 2px solid #fff;
                     font-weight: bold;
                     transition: transform 0.2s;
                 }
                 .stButton button:hover {
                     transform: scale(1.05);
-                    color: #fff; /* Keep text color white on hover */
+                    color: #fff !important; /* Keep text color white on hover */
                 }
             </style>
         """,
