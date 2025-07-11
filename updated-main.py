@@ -206,9 +206,9 @@ html, body {
 /* Main Chatbot Title Enhancement */
 .elegant-heading {
     font-size: 4.5rem !important;
-    font-weight: 800;
+    font-weight: 900;
     text-align: center;
-    margin-top: -20px !important;
+    margin-top: -40px !important;
     color: #ffffff;
     animation: fadeInUp 2.0s ease-out;
 }
