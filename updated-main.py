@@ -9,55 +9,6 @@ from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
 
 
-# v v v PASTE THE ENTIRE CODE BLOCK HERE v v v
-
-# PASTE THIS ENTIRE BLOCK AT THE TOP OF YOUR SCRIPT
-
-# --- HTML & JavaScript for Robust Custom Button Styling ---
-# This block injects JavaScript to reliably find and style the "Start Chat" button.
-styling_injection_js = """
-<script>
-    // This function finds the button by its text and applies your custom class.
-    const styleStartChatButton = () => {
-        // Use window.parent.document to access the main document from within the Streamlit iframe.
-        const allButtons = Array.from(window.parent.document.querySelectorAll('button'));
-        const startButton = allButtons.find(btn => btn.innerText === 'Start Chat');
-        
-        if (startButton) {
-            // Add your existing CSS class to the button.
-            startButton.classList.add('start-chat-btn');
-        }
-    };
-
-    // The MutationObserver watches for changes in the DOM.
-    // This is crucial because Streamlit re-renders the page, and we need 
-    // to re-apply the style whenever the button is added back to the DOM.
-    const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-            // If nodes are added, re-run the styling function.
-            if (mutation.addedNodes.length) {
-                styleStartChatButton();
-            }
-        });
-    });
-
-    // Start observing the document body for added/removed nodes.
-    observer.observe(window.parent.document.body, {
-        childList: true,
-        subtree: true
-    });
-
-    // Also run the function on the initial page load.
-    window.addEventListener('load', styleStartChatButton);
-</script>
-"""
-
-# Inject the JavaScript into the Streamlit app
-st.markdown(styling_injection_js, unsafe_allow_html=True)
-
-# ^ ^ ^ END OF THE BLOCK YOU NEED TO PASTE ^ ^ ^
-
-
 # --- Configuration for Pre-loaded Knowledge Base ---
 KNOWLEDGE_BASE_PATH = 'dataset.xlsx'
 
@@ -286,6 +237,55 @@ background: transparent;   /* Ensures it's see-through */
 }
 </style>
 """, unsafe_allow_html=True)
+
+# v v v PASTE THE ENTIRE CODE BLOCK HERE v v v
+
+# PASTE THIS ENTIRE BLOCK AT THE TOP OF YOUR SCRIPT
+
+# --- HTML & JavaScript for Robust Custom Button Styling ---
+# This block injects JavaScript to reliably find and style the "Start Chat" button.
+styling_injection_js = """
+<script>
+    // This function finds the button by its text and applies your custom class.
+    const styleStartChatButton = () => {
+        // Use window.parent.document to access the main document from within the Streamlit iframe.
+        const allButtons = Array.from(window.parent.document.querySelectorAll('button'));
+        const startButton = allButtons.find(btn => btn.innerText === 'Start Chat');
+        
+        if (startButton) {
+            // Add your existing CSS class to the button.
+            startButton.classList.add('start-chat-btn');
+        }
+    };
+
+    // The MutationObserver watches for changes in the DOM.
+    // This is crucial because Streamlit re-renders the page, and we need 
+    // to re-apply the style whenever the button is added back to the DOM.
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            // If nodes are added, re-run the styling function.
+            if (mutation.addedNodes.length) {
+                styleStartChatButton();
+            }
+        });
+    });
+
+    // Start observing the document body for added/removed nodes.
+    observer.observe(window.parent.document.body, {
+        childList: true,
+        subtree: true
+    });
+
+    // Also run the function on the initial page load.
+    window.addEventListener('load', styleStartChatButton);
+</script>
+"""
+
+# Inject the JavaScript into the Streamlit app
+st.markdown(styling_injection_js, unsafe_allow_html=True)
+
+# ^ ^ ^ END OF THE BLOCK YOU NEED TO PASTE ^ ^ ^
+
 
 # -------------------------------
 # Page Configuration
