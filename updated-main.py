@@ -48,7 +48,8 @@ html, body {
     margin: 3rem 0 !important;
 }
 
-.start-chat-container .stButton > button {
+/* TARGET Streamlit button inside the start-chat-container */
+.start-chat-container .stButton button {
     background: linear-gradient(90deg, #e53935 0%, #b71c1c 100%) !important;
     color: #fff !important;
     border-radius: 25px !important;
@@ -62,11 +63,12 @@ html, body {
     display: block !important;
 }
 
-.start-chat-container .stButton > button:hover {
+.start-chat-container .stButton button:hover {
     transform: scale(1.08) !important;
     color: #fff !important;
     border: 3px solid #fff !important;
 }
+
 
 /* 2. QUICK REPLY & FEEDBACK BUTTONS: New rule to apply your desired style */
 .quick-reply-buttons .stButton > button,
@@ -389,9 +391,11 @@ st.markdown('<div class="transparent-spacer"></div>', unsafe_allow_html=True)
 # Chat App Flow
 # -------------------------------
 if not st.session_state.chat_started:
-    # 3. WRAP a container around the Start Chat button
     st.markdown('<div class="start-chat-container">', unsafe_allow_html=True)
-    if st.button("Start Chat", key="start_chat"):
+
+    # Use a placeholder to control where the button renders
+    btn_placeholder = st.empty()
+    if btn_placeholder.button("Start Chat", key="start_chat"):
         st.session_state.chat_started = True
         st.session_state.show_quick_replies = True
         st.session_state.messages.append({
@@ -399,6 +403,7 @@ if not st.session_state.chat_started:
             "content": "👋 <b><span style='font-size:1.0em;color:#ffff;'>Konnichiwa!</span></b> How can I help you today?"
         })
         st.rerun()
+
     st.markdown('</div>', unsafe_allow_html=True)
 else:
     if st.session_state.knowledge_base_loaded:
