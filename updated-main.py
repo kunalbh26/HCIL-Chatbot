@@ -21,177 +21,191 @@ html, body, .stApp {
 
 /* Your existing .main style, updated to the desired background */
 .main {
-background: transparent !important;
-border-radius: 0px;
-padding: 3.5rem !important;
-max-width: 640px;
-margin: 2.5rem auto;
+    background: transparent !important;
+    border-radius: 0px;
+    padding: 3.5rem !important;
+    max-width: 640px;
+    margin: 2.5rem auto;
 }
 .stSidebar > div:first-child {
     background-color: #323232 !important;
     border-right: 2px solid white;
 }
-/* FIXED: Start Chat Button - Proper Centering */
+
+/* --- BUTTON STYLING FIXES --- */
+
+/* 1. START CHAT BUTTON: Made selector specific to its container */
 .start-chat-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    margin: 3rem 0;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100% !important;
+    margin: 3rem 0 !important;
 }
 
-.stButton > button {
-background: linear-gradient(90deg, #e53935 0%, #b71c1c 100%) !important;
-color: #fff !important;
-border-radius: 25px !important;
-padding: 1.5rem 3rem !important;
-font-size: 1.4rem !important;
-border: 3px solid #fff !important;
-font-weight: bold !important;
-transition: transform 0.2s !important;
-min-width: 200px !important;
-margin: 0 auto !important;
-display: block !important;
+.start-chat-container .stButton > button {
+    background: linear-gradient(90deg, #e53935 0%, #b71c1c 100%) !important;
+    color: #fff !important;
+    border-radius: 25px !important;
+    padding: 1.5rem 3rem !important;
+    font-size: 1.4rem !important;
+    border: 3px solid #fff !important;
+    font-weight: bold !important;
+    transition: transform 0.2s !important;
+    min-width: 200px !important;
+    margin: 0 auto !important;
+    display: block !important;
 }
 
-.stButton > button:hover {
+.start-chat-container .stButton > button:hover {
     transform: scale(1.08) !important;
     color: #fff !important;
     border: 3px solid #fff !important;
 }
+
+/* 2. QUICK REPLY & FEEDBACK BUTTONS: New rule to apply your desired style */
+.quick-reply-buttons .stButton > button,
+.feedback-buttons .stButton > button {
+    display: inline-block !important;
+    background: #fff !important;
+    color: #e53935 !important;
+    border-radius: 18px !important;
+    padding: 0.5rem 1.1rem !important;
+    margin: 0.15rem !important;
+    cursor: pointer !important;
+    font-size: 0.98rem !important;
+    border: 1.5px solid #e53935 !important;
+    font-weight: 500 !important;
+    transition: background 0.2s, color 0.2s !important;
+    width: auto; /* Ensure buttons are not stretched full-width */
+}
+
+.quick-reply-buttons .stButton > button:hover,
+.feedback-buttons .stButton > button:hover {
+    background: #e53935 !important;
+    color: #fff !important;
+}
+
+/* --- END OF BUTTON STYLING FIXES --- */
+
+
 .chat-bubble {
-padding: 1rem 1.5rem;
-border-radius: 20px;
-margin-bottom: 14px;
-max-width: 75%;
-animation: fadeInUp 0.3s;
-position: relative;
-word-break: break-word;
-font-size: 1.08rem;
-display: flex;
-align-items: center;
+    padding: 1rem 1.5rem;
+    border-radius: 20px;
+    margin-bottom: 14px;
+    max-width: 75%;
+    animation: fadeInUp 0.3s;
+    position: relative;
+    word-break: break-word;
+    font-size: 1.08rem;
+    display: flex;
+    align-items: center;
 }
 .user-bubble {
-background: #fff;
-color: #111;
-align-self: flex-end;
-margin-left: auto;
-margin-right: 0;
-border: 1.5px solid #e53935;
+    background: #fff;
+    color: #111;
+    align-self: flex-end;
+    margin-left: auto;
+    margin-right: 0;
+    border: 1.5px solid #e53935;
 }
 .bot-bubble {
-background: linear-gradient(90deg, #e53935 0%, #b71c1c 100%);
-color: #fff;
-align-self: flex-start;
-margin-right: auto;
-margin-left: 0;
-border: 1.5px solid #fff;
+    background: linear-gradient(90deg, #e53935 0%, #b71c1c 100%);
+    color: #fff;
+    align-self: flex-start;
+    margin-right: auto;
+    margin-left: 0;
+    border: 1.5px solid #fff;
 }
 .avatar {
-width: 38px; height: 38px; border-radius: 75%; margin: 0 10px;
-background: #3d3d3d;
-box-shadow: 0 2px 8px rgba(229,57,53,0.12);
-font-size: 1.7rem;
-text-align: center;
-line-height: 38px;
-border: 2px solid #ff0000;
-display: flex; align-items: center; justify-content: center;
+    width: 38px; height: 38px; border-radius: 75%; margin: 0 10px;
+    background: #3d3d3d;
+    box-shadow: 0 2px 8px rgba(229,57,53,0.12);
+    font-size: 1.7rem;
+    text-align: center;
+    line-height: 38px;
+    border: 2px solid #ff0000;
+    display: flex; align-items: center; justify-content: center;
 }
 .user-row {
-display: flex; flex-direction: row; align-items: flex-end; justify-content: flex-end;
+    display: flex; flex-direction: row; align-items: flex-end; justify-content: flex-end;
 }
 .bot-row {
-display: flex; flex-direction: row; align-items: flex-end; justify-content: flex-start;
+    display: flex; flex-direction: row; align-items: flex-end; justify-content: flex-start;
 }
 .input-bar {
-background: #222;
-border-radius: 20px;
-box-shadow: 0 2px 8px rgba(229,57,53,0.12);
-margin-top: 0.5rem;
-display: flex;
-align-items: center;
-padding: 0.3rem 0.8rem;
+    background: #222;
+    border-radius: 20px;
+    box-shadow: 0 2px 8px rgba(229,57,53,0.12);
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    padding: 0.3rem 0.8rem;
 }
 .input-bar input {
-background: transparent;
-border: 2px solid #ff0000;
-color: #fff;
-width: 100%;
-padding: 0.7rem 0.8rem;
-outline: none;
-font-size: 1rem;
+    background: transparent;
+    border: 2px solid #ff0000;
+    color: #fff;
+    width: 100%;
+    padding: 0.7rem 0.8rem;
+    outline: none;
+    font-size: 1rem;
 }
 .send-btn {
-background: linear-gradient(90deg, #e53935 0%, #b71c1c 100%);
-color: #fff;
-border: none;
-border-radius: 50%;
-width: 38px;
-height: 38px;
-font-size: 1.2rem;
-cursor: pointer;
-margin-left: 8px;
-transition: background 0.2s;
-display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(90deg, #e53935 0%, #b71c1c 100%);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 38px;
+    height: 38px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    margin-left: 8px;
+    transition: background 0.2s;
+    display: flex; align-items: center; justify-content: center;
 }
 .send-btn:hover {
-background: #fff;
-color: #e53935;
-border: 1.5px solid #ff00;
+    background: #fff;
+    color: #e53935;
+    border: 1.5px solid #ff00;
 }
-.quick-reply {
-display: inline-block;
-background: #fff;
-color: #e53935;
-border-radius: 18px;
-padding: 0.5rem 1.1rem;
-margin: 0.15rem;
-cursor: pointer;
-font-size: 0.98rem;
-border: 1.5px solid #e53935;
-font-weight: 500;
-transition: background 0.2s, color 0.2s;
-}
-.quick-reply:hover {
-background: #e53935;
-color: #fff;
-}
+
 /* Enhanced Sidebar Title */
 .sidebar-title {
-font-size: 5.5rem;
-color: #EE4B2B;
-font-weight: 900;
-text-align: center;
-margin: 0.5rem 0 1.5rem 0;
-letter-spacing: 0.05em;
-width: 100%;
-line-height: 1.2;
-animation: rotate3D 5s infinite linear;
-transform-style: preserve-3d;
-perspective: 800px;
-text-shadow:
-    0 0 5px rgba(238, 75, 43, 0.5),
-    0 0 10px rgba(238, 75, 43, 0.4),
-    0 0 15px rgba(238, 75, 43, 0.3),
-    1px 1px 2px rgba(0,0,0,0.8);
+    font-size: 5.5rem;
+    color: #EE4B2B;
+    font-weight: 900;
+    text-align: center;
+    margin: 0.5rem 0 1.5rem 0;
+    letter-spacing: 0.05em;
+    width: 100%;
+    line-height: 1.2;
+    animation: rotate3D 5s infinite linear;
+    transform-style: preserve-3d;
+    perspective: 800px;
+    text-shadow:
+        0 0 5px rgba(238, 75, 43, 0.5),
+        0 0 10px rgba(238, 75, 43, 0.4),
+        0 0 15px rgba(238, 75, 43, 0.3),
+        1px 1px 2px rgba(0,0,0,0.8);
 }
 
 @keyframes rotate3D {
     0% { transform: rotateY(0deg) scale(1); }
-   25% { transform: rotateY(90deg) scale(1.05); }
-   50% { transform: rotateY(180deg) scale(1); }
-   75% { transform: rotateY(270deg) scale(1.05); }
-  100% { transform: rotateY(360deg) scale(1); }
+    25% { transform: rotateY(90deg) scale(1.05); }
+    50% { transform: rotateY(180deg) scale(1); }
+    75% { transform: rotateY(270deg) scale(1.05); }
+    100% { transform: rotateY(360deg) scale(1); }
 }
 
 /* Main Chatbot Title Enhancement */
 .elegant-heading {
-font-size: 5.0rem !important;
-font-weight: 800;
-text-align: center;
-margin-top: -5px;
-color: #ffffff;
-animation: fadeInUp 2.0s ease-out;
+    font-size: 5.0rem !important;
+    font-weight: 800;
+    text-align: center;
+    margin-top: -5px;
+    color: #ffffff;
+    animation: fadeInUp 2.0s ease-out;
 }
 
 @keyframes fadeInUp {
@@ -199,18 +213,18 @@ animation: fadeInUp 2.0s ease-out;
     100% { opacity: 1; transform: translateY(0); }
 }
 .typing-indicator {
-display: flex; align-items: center; margin-bottom: 1.1rem;
+    display: flex; align-items: center; margin-bottom: 1.1rem;
 }
 .typing-dots span {
-height: 10px; width: 10px; margin: 0 2px;
-background: #e53935; border-radius: 25%; display: inline-block;
-animation: blink 1.2s infinite both;
+    height: 10px; width: 10px; margin: 0 2px;
+    background: #e53935; border-radius: 25%; display: inline-block;
+    animation: blink 1.2s infinite both;
 }
 .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
 .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
 @keyframes blink {
-0%, 80%, 100% { opacity: 0.2; }
-40% { opacity: 1; }
+    0%, 80%, 100% { opacity: 0.2; }
+    40% { opacity: 1; }
 }
 </style>
 """, unsafe_allow_html=True)
@@ -362,6 +376,8 @@ st.markdown("<h1 class='elegant-heading'>🤖 HCIL IT Helpdesk Chatbot</h1>", un
 # Chat App Flow
 # -------------------------------
 if not st.session_state.chat_started:
+    # 3. WRAP a container around the Start Chat button
+    st.markdown('<div class="start-chat-container">', unsafe_allow_html=True)
     if st.button("Start Chat", key="start_chat"):
         st.session_state.chat_started = True
         st.session_state.show_quick_replies = True
@@ -370,6 +386,7 @@ if not st.session_state.chat_started:
             "content": "👋 <b><span style='font-size:1.0em;color:#ffff;'>Konnichiwa!</span></b> How can I help you today?"
         })
         st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
 else:
     if st.session_state.knowledge_base_loaded:
         render_chat(st.session_state.messages)
@@ -385,13 +402,17 @@ else:
             show_typing()
 
         if st.session_state.show_quick_replies:
-            st.markdown('<div style="margin-bottom:3rem;">', unsafe_allow_html=True)
-            for reply in st.session_state.quick_replies:
-                if st.button(reply, key=f"quick_{reply}"):
+            # 3. WRAP a container around the Quick Reply buttons
+            st.markdown('<div class="quick-reply-buttons" style="margin-bottom:3rem;">', unsafe_allow_html=True)
+            cols = st.columns(len(st.session_state.quick_replies))
+            for i, reply in enumerate(st.session_state.quick_replies):
+                if cols[i].button(reply, key=f"quick_{reply}", use_container_width=True):
                     st.session_state.messages.append({"role": "user", "content": reply})
                     st.session_state.show_typing = True
                     st.session_state.show_quick_replies = False
                     st.rerun()
+            st.markdown('</div>', unsafe_allow_html=True)
+
 
         if st.session_state.show_typing:
             time.sleep(1.2)
@@ -409,6 +430,8 @@ else:
 # -------------------------------
 if st.session_state.chat_started and not st.session_state.chat_ended:
     if st.session_state.feedback_request:
+        # 3. WRAP a container around the Feedback buttons
+        st.markdown('<div class="feedback-buttons">', unsafe_allow_html=True)
         st.markdown("#### Was this helpful?")
         col1, col2, col3, col4 = st.columns(4)
         if col1.button("👍", use_container_width=True): 
@@ -427,6 +450,8 @@ if st.session_state.chat_started and not st.session_state.chat_ended:
             st.session_state.messages.append({"role": "bot", "content": "Thank you for your feedback! 😊"}); 
             st.session_state.feedback_request = False; 
             st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
+
 
     with st.form("chat_input_form", clear_on_submit=True):
         col1, col2 = st.columns([6, 1])
