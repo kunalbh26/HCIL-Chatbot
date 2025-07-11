@@ -21,11 +21,11 @@ html, body, .stApp {
 
 /* Your existing .main style, updated to the desired background */
 .main {
-    background: transparent !important;
-    border-radius: 0px;
-    padding: 3.5rem !important;
-    max-width: 640px;
-    margin: 2.5rem auto;
+    background: #ffffff !important;
+    border-radius: 10px;
+    padding-top: 3.5rem !important;
+    max-width: 740px;
+    margin: 3.5rem auto;
 }
 .stSidebar > div:first-child {
     background-color: #323232 !important;
