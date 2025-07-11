@@ -402,7 +402,7 @@ if not st.session_state.chat_started:
     });
     </script>
     """, unsafe_allow_html=True)
-)
+
 else:
     if st.session_state.knowledge_base_loaded:
         render_chat(st.session_state.messages)
