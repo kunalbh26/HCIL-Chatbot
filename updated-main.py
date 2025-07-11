@@ -391,7 +391,7 @@ if not st.session_state.chat_started:
             })
             st.rerun()
 
-        # 🔽 Place the JavaScript right after the button
+    # ✅ JavaScript to add a unique class to only the Start Chat button
     st.markdown("""
     <script>
     const buttons = window.parent.document.querySelectorAll('button');
@@ -402,8 +402,7 @@ if not st.session_state.chat_started:
     });
     </script>
     """, unsafe_allow_html=True)
-
-     st.markdown('</div>', unsafe_allow_html=True)
+)
 else:
     if st.session_state.knowledge_base_loaded:
         render_chat(st.session_state.messages)
