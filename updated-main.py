@@ -410,7 +410,7 @@ else:
             # 3. WRAP a container around the Quick Reply buttons
             st.markdown('<div class="quick-reply-buttons" style="margin-bottom:3rem;">', unsafe_allow_html=True)
             for reply in st.session_state.quick_replies:
-                if st.button(reply, key=f"quick_{reply}", use_container_width=True):
+                if st.button(reply, key=f"quick_{reply}"):
                     st.session_state.messages.append({"role": "user", "content": reply})
                     st.session_state.show_typing = True
                     st.session_state.show_quick_replies = False
