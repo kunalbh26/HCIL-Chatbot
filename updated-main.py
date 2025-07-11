@@ -139,7 +139,7 @@ html, body {
     display: flex; flex-direction: row; align-items: flex-end; justify-content: flex-start;
 }
 .input-bar {
-    background: transparent;
+    background: transparent !important;
     border-radius: 20px;
     box-shadow: 0 2px 8px rgba(229,57,53,0.12);
     margin-top: 0.5rem;
@@ -148,7 +148,7 @@ html, body {
     padding: 0.3rem 0.8rem;
 }
 .input-bar input {
-    background: transparent;
+    background: transparent !important;
     border: 3px solid #ffffff !important;
     color: #fff;
     width: 100%;
@@ -161,7 +161,7 @@ html, body {
     color: #fff;
     border: none;
     border-radius: 50%;
-    width: 38px;
+    width: 46px !important;
     height: 38px;
     font-size: 1.2rem;
     cursor: pointer;
@@ -464,9 +464,10 @@ if st.session_state.chat_started and not st.session_state.chat_ended:
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
 
-
+    if st.session_state.feedback_request = False;
+       st.markdown('<div class="transparent-spacer"></div>', unsafe_allow_html=True)
     with st.form("chat_input_form", clear_on_submit=True):
-        col1, col2 = st.columns([6, 1])
+        col1, col2 = st.columns([8, 1])
         with col1:
             user_input = st.text_input("user_input", placeholder="Type here...", key="input_bar", label_visibility="collapsed")
         with col2:
