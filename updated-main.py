@@ -39,7 +39,8 @@ html, body {
 
 /* --- BUTTON STYLING FIXES --- */
 
-.start-chat-btn {
+/* Style ONLY the first button — assuming it's the Start Chat button */
+div.stButton:nth-of-type(1) button {
     background: linear-gradient(90deg, #e53935 0%, #b71c1c 100%) !important;
     color: #fff !important;
     border-radius: 25px !important;
@@ -53,11 +54,10 @@ html, body {
     display: block !important;
 }
 
-.start-chat-btn:hover {
+div.stButton:nth-of-type(1) button:hover {
     transform: scale(1.08) !important;
-    color: #fff !important;
-    border: 3px solid #fff !important;
 }
+
 
 /* 2. QUICK REPLY & FEEDBACK BUTTONS: New rule to apply your desired style */
 .quick-reply-buttons .stButton > button,
@@ -385,23 +385,11 @@ if not st.session_state.chat_started:
         if st.button("Start Chat", key="start_chat"):
             st.session_state.chat_started = True
             st.session_state.show_quick_replies = True
-            st.session_state.messages.append({
+            st.session_state.messages = [{
                 "role": "bot",
                 "content": "👋 <b><span style='font-size:1.0em;color:#ffff;'>Konnichiwa!</span></b> How can I help you today?"
-            })
+            }]
             st.rerun()
-
-    # ✅ JavaScript to add a unique class to only the Start Chat button
-    st.markdown("""
-    <script>
-    const buttons = window.parent.document.querySelectorAll('button');
-    buttons.forEach(btn => {
-        if (btn.innerText === 'Start Chat') {
-            btn.classList.add('start-chat-btn');
-        }
-    });
-    </script>
-    """, unsafe_allow_html=True)
 
 else:
     if st.session_state.knowledge_base_loaded:
