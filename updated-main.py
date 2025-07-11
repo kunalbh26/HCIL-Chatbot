@@ -464,7 +464,7 @@ if st.session_state.chat_started and not st.session_state.chat_ended:
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
 
-    if st.session_state.feedback_request = False;
+    if st.session_state.feedback_request == False;
        st.markdown('<div class="transparent-spacer"></div>', unsafe_allow_html=True)
     with st.form("chat_input_form", clear_on_submit=True):
         col1, col2 = st.columns([8, 1])
