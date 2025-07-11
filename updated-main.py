@@ -390,23 +390,10 @@ if "chat_started" not in st.session_state:
 
 if not st.session_state.chat_started:
     # Use container layout
-    col1, col2, col3 = st.columns([1, 2, 1])
+    col1, col2, col3 = st.columns([1, 4, 1])
     with col2:
         st.button("Start Chat", key="start_chat_button")
 
-    # Inject JavaScript to find this exact button by its text and add a class
-    st.markdown("""
-    <script>
-    const btns = window.parent.document.querySelectorAll("button");
-    btns.forEach(btn => {
-        if (btn.innerText.trim() === "Start Chat") {
-            btn.classList.add("start-chat-btn");
-        }
-    });
-    </script>
-    """, unsafe_allow_html=True)
-
-    # Handle button action AFTER JS
     if st.session_state.get("start_chat_button"):
         st.session_state.chat_started = True
         st.session_state.show_quick_replies = True
