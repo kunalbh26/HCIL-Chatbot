@@ -330,14 +330,25 @@ else:
     if st.session_state.show_typing:
         show_typing()
 
-    for reply in st.session_state.quick_replies:
-        if st.button(reply, key=f"quick_{reply}"):
-            st.session_state.messages.append({"role": "user", "content": reply})
-            st.session_state.show_typing = True
-            st.rerun()
+# Quick Replies (stacked vertically with spacing)
+st.markdown('<div style="margin: 1.5rem 0;">', unsafe_allow_html=True)
+for reply in st.session_state.quick_replies:
+    st.markdown(
+        f"""
+        <button class="quick-reply" onclick="document.getElementById('{reply}').click()">{reply}</button>
+        <input type="hidden" id="{reply}" />
+        """,
+        unsafe_allow_html=True,
+    )
+    if st.button(reply, key=f"quick_{reply}"):
+        st.session_state.messages.append({"role": "user", "content": reply})
+        st.session_state.show_typing = True
+        st.rerun()
+st.markdown('</div>', unsafe_allow_html=True)
+
 
     if st.session_state.feedback_request:
-        st.markdown("#### Was this helpful?")
+        st.markdown("<div style='margin-top: 2rem; margin-bottom: 1rem;'><h4>Was this helpful?</h4></div>", unsafe_allow_html=True)
         col1, col2, col3, col4 = st.columns(4)
         if col1.button("👍"): st.session_state.messages.append({"role": "bot", "content": "Great! Let me know if there is something else that I can help you with."}); st.session_state.feedback_request = False; st.rerun()
         if col2.button("👎"): st.session_state.messages.append({"role": "bot", "content": "I apologize. Could you please rephrase your question?"}); st.session_state.feedback_request = False; st.rerun()
