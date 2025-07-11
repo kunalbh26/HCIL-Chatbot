@@ -217,6 +217,11 @@ html, body {
     0% { opacity: 0; transform: translateY(20px); }
     100% { opacity: 1; transform: translateY(0); }
 }
+.transparent-spacer {
+height: 60px;              /* Adjust the vertical space */
+background: transparent;   /* Ensures it's see-through */
+}
+
 .typing-indicator {
     display: flex; align-items: center; margin-bottom: 1.1rem;
 }
@@ -377,6 +382,7 @@ for key, val in defaults.items():
         st.session_state[key] = val
 
 st.markdown("<h1 class='elegant-heading'>🤖 HCIL IT Helpdesk Chatbot</h1>", unsafe_allow_html=True)
+st.markdown("<div class="transparent-spacer"></div>", unsafe_allow_html=True)
 # -------------------------------
 # Chat App Flow
 # -------------------------------
