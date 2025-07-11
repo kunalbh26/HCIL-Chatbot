@@ -390,7 +390,7 @@ if "chat_started" not in st.session_state:
 
 if not st.session_state.chat_started:
     # Use container layout
-    col1, col2, col3 = st.columns([1, 4, 1])
+    col1, col2, col3 = st.columns([1, 1, 1])
     with col2:
         st.button("Start Chat", key="start_chat_button")
 
