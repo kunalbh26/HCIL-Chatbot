@@ -330,21 +330,21 @@ else:
     if st.session_state.show_typing:
         show_typing()
 
-# Quick Replies (stacked vertically with spacing)
-st.markdown('<div style="margin: 1.5rem 0;">', unsafe_allow_html=True)
-for reply in st.session_state.quick_replies:
-    st.markdown(
-        f"""
-        <button class="quick-reply" onclick="document.getElementById('{reply}').click()">{reply}</button>
-        <input type="hidden" id="{reply}" />
-        """,
-        unsafe_allow_html=True,
-    )
-    if st.button(reply, key=f"quick_{reply}"):
-        st.session_state.messages.append({"role": "user", "content": reply})
-        st.session_state.show_typing = True
-        st.rerun()
-st.markdown('</div>', unsafe_allow_html=True)
+    # Quick Replies (stacked vertically with spacing)
+    st.markdown('<div style="margin: 1.5rem 0;">', unsafe_allow_html=True)
+    for reply in st.session_state.quick_replies:
+        st.markdown(
+            f"""
+            <button class="quick-reply" onclick="document.getElementById('{reply}').click()">{reply}</button>
+            <input type="hidden" id="{reply}" />
+            """,
+            unsafe_allow_html=True,
+        )
+        if st.button(reply, key=f"quick_{reply}"):
+           st.session_state.messages.append({"role": "user", "content": reply})
+           st.session_state.show_typing = True
+           st.rerun()
+     st.markdown('</div>', unsafe_allow_html=True)
 
 
     if st.session_state.feedback_request:
