@@ -39,10 +39,10 @@ html, body {
 
 /* --- BUTTON STYLING FIXES --- */
 
-/* Style ONLY the first button — assuming it's the Start Chat button */
-div.stButton:nth-of-type(1) button {
+/* Style only the Start Chat button */
+.start-chat-btn {
     background: linear-gradient(90deg, #e53935 0%, #b71c1c 100%) !important;
-    color: #fff !important;
+    color: white !important;
     border-radius: 25px !important;
     padding: 1.5rem 3rem !important;
     font-size: 1.4rem !important;
@@ -54,8 +54,9 @@ div.stButton:nth-of-type(1) button {
     display: block !important;
 }
 
-div.stButton:nth-of-type(1) button:hover {
+.start-chat-btn:hover {
     transform: scale(1.08) !important;
+    color: white !important;
 }
 
 
@@ -379,17 +380,37 @@ st.markdown('<div class="transparent-spacer"></div>', unsafe_allow_html=True)
 # -------------------------------
 # Chat App Flow
 # -------------------------------
+# Only show this if chat hasn't started
+if "chat_started" not in st.session_state:
+    st.session_state.chat_started = False
+
 if not st.session_state.chat_started:
+    # Use container layout
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        if st.button("Start Chat", key="start_chat"):
-            st.session_state.chat_started = True
-            st.session_state.show_quick_replies = True
-            st.session_state.messages = [{
-                "role": "bot",
-                "content": "👋 <b><span style='font-size:1.0em;color:#ffff;'>Konnichiwa!</span></b> How can I help you today?"
-            }]
-            st.rerun()
+        st.button("Start Chat", key="start_chat_button")
+
+    # Inject JavaScript to find this exact button by its text and add a class
+    st.markdown("""
+    <script>
+    const btns = window.parent.document.querySelectorAll("button");
+    btns.forEach(btn => {
+        if (btn.innerText.trim() === "Start Chat") {
+            btn.classList.add("start-chat-btn");
+        }
+    });
+    </script>
+    """, unsafe_allow_html=True)
+
+    # Handle button action AFTER JS
+    if st.session_state.get("start_chat_button"):
+        st.session_state.chat_started = True
+        st.session_state.show_quick_replies = True
+        st.session_state.messages = [{
+            "role": "bot",
+            "content": "👋 <b><span style='font-size:1.0em;color:#ffff;'>Konnichiwa!</span></b> How can I help you today?"
+        }]
+        st.rerun()
 
 else:
     if st.session_state.knowledge_base_loaded:
