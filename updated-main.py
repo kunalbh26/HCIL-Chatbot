@@ -218,7 +218,7 @@ html, body {
     100% { opacity: 1; transform: translateY(0); }
 }
 .transparent-spacer {
-height: 60px;              /* Adjust the vertical space */
+height: 150px;              /* Adjust the vertical space */
 background: transparent;   /* Ensures it's see-through */
 }
 
