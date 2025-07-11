@@ -139,7 +139,7 @@ html, body {
     display: flex; flex-direction: row; align-items: flex-end; justify-content: flex-start;
 }
 .input-bar {
-    background: #222;
+    background: transparent;
     border-radius: 20px;
     box-shadow: 0 2px 8px rgba(229,57,53,0.12);
     margin-top: 0.5rem;
@@ -149,7 +149,7 @@ html, body {
 }
 .input-bar input {
     background: transparent;
-    border: 2px solid #ff0000;
+    border: 3px solid #ffffff !important;
     color: #fff;
     width: 100%;
     padding: 0.7rem 0.8rem;
