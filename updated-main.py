@@ -82,7 +82,6 @@ html, body {
     border: 1.5px solid #e53935 !important;
     font-weight: 500 !important;
     transition: background 0.2s, color 0.2s !important;
-    width: auto; /* Ensure buttons are not stretched full-width */
 }
 
 .quick-reply-buttons .stButton > button:hover,
