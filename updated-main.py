@@ -26,10 +26,10 @@ html, body {
 
 /* Your existing .main style, updated to the desired background */
 .main {
-    background: #000000; /* Use your desired dark background here */
-    border-radius: 0px;
+    background: #000000 !important; /* Use your desired dark background here */
+    border-radius: 20px !important;
     padding: 3.5rem !important;
-    max-width: 640px;
+    max-width: 640px !important;
     margin: 2.5rem auto;
 }
 .stSidebar > div:first-child {
@@ -205,10 +205,10 @@ html, body {
 
 /* Main Chatbot Title Enhancement */
 .elegant-heading {
-    font-size: 5.0rem !important;
+    font-size: 4.5rem !important;
     font-weight: 800;
     text-align: center;
-    margin-top: -5px;
+    margin-top: -20px !important;
     color: #ffffff;
     animation: fadeInUp 2.0s ease-out;
 }
