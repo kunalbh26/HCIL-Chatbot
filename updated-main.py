@@ -22,6 +22,7 @@ html, body, .stApp {
 /* Your existing .main style, updated to the desired background */
 .main {
     background: #ffffff !important;
+    align-items: center !important;
     border-radius: 10px;
     padding-top: 3.5rem !important;
     max-width: 740px;
