@@ -12,28 +12,20 @@ from fuzzywuzzy import process
 # --- Configuration for Pre-loaded Knowledge Base ---
 KNOWLEDGE_BASE_PATH = 'dataset.xlsx'
 
-st.markdown("""
-<style>
-# ... (your existing CSS continues here)
-
-# --- Configuration for Pre-loaded Knowledge Base ---
-KNOWLEDGE_BASE_PATH = 'dataset.xlsx'
+# PASTE THIS CORRECTED BLOCK IN ITS PLACE
 
 st.markdown("""
 <style>
-/* Ensure the very root HTML and body are black */
+/* General Body and App Styling */
 html, body {
-    background-color: #000000 !important; /* Strict background color */
+    background-color: #000000 !important;
     color: white !important;
 }
-
 .stApp {
-    background-color: #000000 !important; /* Strict background color for the app container */
+    background-color: #000000 !important;
 }
-
-/* Your existing .main style, updated to the desired background */
 .main {
-    background: #000000 !important; /* Use your desired dark background here */
+    background: #000000 !important;
     border-radius: 20px !important;
     padding: 3.5rem !important;
     max-width: 640px !important;
@@ -44,9 +36,9 @@ html, body {
     border-right: 2px solid white;
 }
 
-/* --- BUTTON STYLING FIXES --- */
+/* --- BUTTON STYLING --- */
 
-/* Style only the Start Chat button */
+/* 1. Start Chat Button */
 .start-chat-btn {
     background: linear-gradient(90deg, #e53935 0%, #b71c1c 100%) !important;
     color: white !important;
@@ -60,14 +52,12 @@ html, body {
     margin: 0 auto !important;
     display: block !important;
 }
-
 .start-chat-btn:hover {
     transform: scale(1.08) !important;
     color: white !important;
 }
 
-
-/* 2. QUICK REPLY & FEEDBACK BUTTONS: New rule to apply your desired style */
+/* 2. Quick Reply & Feedback Buttons */
 .quick-reply-buttons .stButton > button,
 .feedback-buttons .stButton > button {
     display: inline-block !important;
@@ -83,16 +73,13 @@ html, body {
     transition: background 0.2s, color 0.2s !important;
     width: auto !important;
 }
-
 .quick-reply-buttons .stButton > button:hover,
 .feedback-buttons .stButton > button:hover {
     background: #e53935 !important;
     color: #fff !important;
 }
 
-/* --- END OF BUTTON STYLING FIXES --- */
-
-
+/* --- CHAT BUBBLE STYLING --- */
 .chat-bubble {
     padding: 1rem 1.5rem;
     border-radius: 20px;
@@ -137,6 +124,8 @@ html, body {
 .bot-row {
     display: flex; flex-direction: row; align-items: flex-end; justify-content: flex-start;
 }
+
+/* --- INPUT BAR --- */
 .input-bar {
     background: transparent !important;
     border-radius: 20px;
@@ -174,7 +163,7 @@ html, body {
     border: 1.5px solid #ff00;
 }
 
-/* Enhanced Sidebar Title */
+/* --- ANIMATIONS & TITLES --- */
 .sidebar-title {
     font-size: 5.5rem;
     color: #EE4B2B;
@@ -187,13 +176,8 @@ html, body {
     animation: rotate3D 5s infinite linear;
     transform-style: preserve-3d;
     perspective: 800px;
-    text-shadow:
-        0 0 5px rgba(238, 75, 43, 0.5),
-        0 0 10px rgba(238, 75, 43, 0.4),
-        0 0 15px rgba(238, 75, 43, 0.3),
-        1px 1px 2px rgba(0,0,0,0.8);
+    text-shadow: 0 0 5px rgba(238, 75, 43, 0.5), 0 0 10px rgba(238, 75, 43, 0.4), 0 0 15px rgba(238, 75, 43, 0.3), 1px 1px 2px rgba(0,0,0,0.8);
 }
-
 @keyframes rotate3D {
     0% { transform: rotateY(0deg) scale(1); }
     25% { transform: rotateY(90deg) scale(1.05); }
@@ -201,8 +185,6 @@ html, body {
     75% { transform: rotateY(270deg) scale(1.05); }
     100% { transform: rotateY(360deg) scale(1); }
 }
-
-/* Main Chatbot Title Enhancement */
 .elegant-heading {
     font-size: 4.5rem !important;
     font-weight: 900;
@@ -211,16 +193,14 @@ html, body {
     color: #ffffff;
     animation: fadeInUp 2.0s ease-out;
 }
-
 @keyframes fadeInUp {
     0% { opacity: 0; transform: translateY(20px); }
     100% { opacity: 1; transform: translateY(0); }
 }
 .transparent-spacer {
-height: 150px;              /* Adjust the vertical space */
-background: transparent;   /* Ensures it's see-through */
+    height: 150px;
+    background: transparent;
 }
-
 .typing-indicator {
     display: flex; align-items: center; margin-bottom: 1.1rem;
 }
