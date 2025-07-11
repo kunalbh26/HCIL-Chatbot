@@ -76,7 +76,6 @@ html, body {
     color: white !important;
 }
 
-/* Target Streamlit's main content area */
 .stApp {
     background-color: #000000 !important; /* Strict background color for the app container */
 }
