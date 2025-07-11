@@ -14,51 +14,51 @@ KNOWLEDGE_BASE_PATH = 'dataset.xlsx'
 st.markdown("""
 <style>
 /* Ensure the very root HTML and body are black */
-html, body, .stApp {{
+html, body, .stApp {
     background-color: #1F1F1F !important;
     color: white !important;
-}}
+}
 
 /* Your existing .main style, updated to the desired background */
 .main {
-    background: transparent !important; /* Use your desired dark background here */
-    border-radius: 0px;
-    padding: 3.5rem !important;
-    max-width: 640px;
-    margin: 2.5rem auto;
+background: transparent !important;
+border-radius: 0px;
+padding: 3.5rem !important;
+max-width: 640px;
+margin: 2.5rem auto;
 }
-.stSidebar > div:first-child {{
+.stSidebar > div:first-child {
     background-color: #323232 !important;
     border-right: 2px solid white;
-}}
+}
 /* FIXED: Start Chat Button - Proper Centering */
-.start-chat-container {{
+.start-chat-container {
     display: flex;
     justify-content: center;
     align-items: center;
     width: 100%;
     margin: 3rem 0;
-}}
+}
 
-.stButton > button {{
-    background: linear-gradient(90deg, #e53935 0%, #b71c1c 100%) !important;
-    color: #fff !important;
-    border-radius: 25px !important;
-    padding: 1.5rem 3rem !important;
-    font-size: 1.4rem !important;
-    border: 3px solid #fff !important;
-    font-weight: bold !important;
-    transition: transform 0.2s !important;
-    min-width: 200px !important;
-    margin: 0 auto !important;
-    display: block !important;
-}}
+.stButton > button {
+background: linear-gradient(90deg, #e53935 0%, #b71c1c 100%) !important;
+color: #fff !important;
+border-radius: 25px !important;
+padding: 1.5rem 3rem !important;
+font-size: 1.4rem !important;
+border: 3px solid #fff !important;
+font-weight: bold !important;
+transition: transform 0.2s !important;
+min-width: 200px !important;
+margin: 0 auto !important;
+display: block !important;
+}
 
-.stButton > button:hover {{
+.stButton > button:hover {
     transform: scale(1.08) !important;
     color: #fff !important;
     border: 3px solid #fff !important;
-}}
+}
 .chat-bubble {
 padding: 1rem 1.5rem;
 border-radius: 20px;
@@ -157,47 +157,47 @@ background: #e53935;
 color: #fff;
 }
 /* Enhanced Sidebar Title */
-.sidebar-title {{
-    font-size: 5.5rem;
-    color: #EE4B2B;
-    font-weight: 900;
-    text-align: center;
-    margin: 0.5rem 0 1.5rem 0;
-    letter-spacing: 0.05em;
-    width: 100%;
-    line-height: 1.2;
-    animation: rotate3D 5s infinite linear;
-    transform-style: preserve-3d;
-    perspective: 800px;
-    text-shadow:
-        0 0 5px rgba(238, 75, 43, 0.5),
-        0 0 10px rgba(238, 75, 43, 0.4),
-        0 0 15px rgba(238, 75, 43, 0.3),
-        1px 1px 2px rgba(0,0,0,0.8);
-}}
+.sidebar-title {
+font-size: 5.5rem;
+color: #EE4B2B;
+font-weight: 900;
+text-align: center;
+margin: 0.5rem 0 1.5rem 0;
+letter-spacing: 0.05em;
+width: 100%;
+line-height: 1.2;
+animation: rotate3D 5s infinite linear;
+transform-style: preserve-3d;
+perspective: 800px;
+text-shadow:
+    0 0 5px rgba(238, 75, 43, 0.5),
+    0 0 10px rgba(238, 75, 43, 0.4),
+    0 0 15px rgba(238, 75, 43, 0.3),
+    1px 1px 2px rgba(0,0,0,0.8);
+}
 
-@keyframes rotate3D {{
-    0% {{ transform: rotateY(0deg) scale(1); }}
-    25% {{ transform: rotateY(90deg) scale(1.05); }}
-    50% {{ transform: rotateY(180deg) scale(1); }}
-    75% {{ transform: rotateY(270deg) scale(1.05); }}
-    100% {{ transform: rotateY(360deg) scale(1); }}
-}}
+@keyframes rotate3D {
+    0% { transform: rotateY(0deg) scale(1); }
+   25% { transform: rotateY(90deg) scale(1.05); }
+   50% { transform: rotateY(180deg) scale(1); }
+   75% { transform: rotateY(270deg) scale(1.05); }
+  100% { transform: rotateY(360deg) scale(1); }
+}
 
 /* Main Chatbot Title Enhancement */
-.elegant-heading {{
-    font-size: 5.0rem !important;
-    font-weight: 800;
-    text-align: center;
-    margin-top: -5px;
-    color: #ffffff;
-    animation: fadeInUp 2.0s ease-out;
-}}
+.elegant-heading {
+font-size: 5.0rem !important;
+font-weight: 800;
+text-align: center;
+margin-top: -5px;
+color: #ffffff;
+animation: fadeInUp 2.0s ease-out;
+}
 
-@keyframes fadeInUp {{
-    0% {{ opacity: 0; transform: translateY(20px); }}
-    100% {{ opacity: 1; transform: translateY(0); }}
-}}
+@keyframes fadeInUp {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
 .typing-indicator {
 display: flex; align-items: center; margin-bottom: 1.1rem;
 }
