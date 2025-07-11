@@ -14,22 +14,26 @@ KNOWLEDGE_BASE_PATH = 'dataset.xlsx'
 st.markdown("""
 <style>
 /* Ensure the very root HTML and body are black */
-html, body, .stApp {
-    background-color: #1F1F1F !important;
+html, body {
+    background-color: #000000 !important; /* Strict background color */
     color: white !important;
+}
+
+/* Target Streamlit's main content area */
+.stApp {
+    background-color: #000000 !important; /* Strict background color for the app container */
 }
 
 /* Your existing .main style, updated to the desired background */
 .main {
-    background: #ffffff !important;
-    align-items: center !important;
-    border-radius: 10px;
-    padding-top: 3.5rem !important;
-    max-width: 740px;
-    margin: 3.5rem auto;
+    background: #000000; /* Use your desired dark background here */
+    border-radius: 0px;
+    padding: 3.5rem !important;
+    max-width: 640px;
+    margin: 2.5rem auto;
 }
 .stSidebar > div:first-child {
-    background-color: #323232 !important;
+    background-color: #1F1F1F !important;
     border-right: 2px solid white;
 }
 
