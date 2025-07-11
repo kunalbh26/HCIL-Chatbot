@@ -162,7 +162,8 @@ animation: blink 1.2s infinite both;
 0%, 80%, 100% { opacity: 0.2; }
 40% { opacity: 1; }
 }
-.stButton > button {
+/* Apply custom style ONLY to the Start Chat button */
+button[data-testid="start-chat-button"] {
     background: linear-gradient(90deg, #e53935 0%, #b71c1c 100%) !important;
     color: #fff !important;
     border-radius: 25px !important;
@@ -175,11 +176,12 @@ animation: blink 1.2s infinite both;
     margin: 0 auto !important;
     display: block !important;
 }
-.stButton > button:hover {
+button[data-testid="start-chat-button"]:hover {
     transform: scale(1.08) !important;
     color: #fff !important;
     border: 3px solid #fff !important;
 }
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -308,7 +310,8 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 if not st.session_state.chat_started:
-    if st.button("Start Chat", key="start_chat"):
+    start_chat_btn = st.button("Start Chat", key="start-chat-button")
+    if start_chat_btn:
         st.session_state.chat_started = True
         st.session_state.messages.append({
             "role": "bot",
