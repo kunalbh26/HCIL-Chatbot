@@ -8,72 +8,25 @@ import re
 from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
 
-# v v v PASTE THE ENTIRE CODE BLOCK HERE v v v
-
-# PASTE THIS ENTIRE BLOCK AT THE TOP OF YOUR SCRIPT
-
-# --- HTML & JavaScript for Robust Custom Button Styling ---
-# This block injects JavaScript to reliably find and style the "Start Chat" button.
-styling_injection_js = """
-<script>
-    // This function finds the button by its text and applies your custom class.
-    const styleStartChatButton = () => {
-        // Use window.parent.document to access the main document from within the Streamlit iframe.
-        const allButtons = Array.from(window.parent.document.querySelectorAll('button'));
-        const startButton = allButtons.find(btn => btn.innerText === 'Start Chat');
-        
-        if (startButton) {
-            // Add your existing CSS class to the button.
-            startButton.classList.add('start-chat-btn');
-        }
-    };
-
-    // The MutationObserver watches for changes in the DOM.
-    // This is crucial because Streamlit re-renders the page, and we need 
-    // to re-apply the style whenever the button is added back to the DOM.
-    const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-            // If nodes are added, re-run the styling function.
-            if (mutation.addedNodes.length) {
-                styleStartChatButton();
-            }
-        });
-    });
-
-    // Start observing the document body for added/removed nodes.
-    observer.observe(window.parent.document.body, {
-        childList: true,
-        subtree: true
-    });
-
-    // Also run the function on the initial page load.
-    window.addEventListener('load', styleStartChatButton);
-</script>
-"""
-
-# Inject the JavaScript into the Streamlit app
-st.markdown(styling_injection_js, unsafe_allow_html=True)
-
-# ^ ^ ^ END OF THE BLOCK YOU NEED TO PASTE ^ ^ ^
-
-
 # --- Configuration for Pre-loaded Knowledge Base ---
 KNOWLEDGE_BASE_PATH = 'dataset.xlsx'
 
-# PASTE THIS CORRECTED BLOCK IN ITS PLACE
-
 st.markdown("""
 <style>
-/* General Body and App Styling */
+/* Ensure the very root HTML and body are black */
 html, body {
-    background-color: #000000 !important;
+    background-color: #000000 !important; /* Strict background color */
     color: white !important;
 }
+
+/* Target Streamlit's main content area */
 .stApp {
-    background-color: #000000 !important;
+    background-color: #000000 !important; /* Strict background color for the app container */
 }
+
+/* Your existing .main style, updated to the desired background */
 .main {
-    background: #000000 !important;
+    background: #000000 !important; /* Use your desired dark background here */
     border-radius: 20px !important;
     padding: 3.5rem !important;
     max-width: 640px !important;
@@ -84,9 +37,9 @@ html, body {
     border-right: 2px solid white;
 }
 
-/* --- BUTTON STYLING --- */
+/* --- BUTTON STYLING FIXES --- */
 
-/* 1. Start Chat Button */
+/* Style only the Start Chat button */
 .start-chat-btn {
     background: linear-gradient(90deg, #e53935 0%, #b71c1c 100%) !important;
     color: white !important;
@@ -100,12 +53,14 @@ html, body {
     margin: 0 auto !important;
     display: block !important;
 }
+
 .start-chat-btn:hover {
     transform: scale(1.08) !important;
     color: white !important;
 }
 
-/* 2. Quick Reply & Feedback Buttons */
+
+/* 2. QUICK REPLY & FEEDBACK BUTTONS: New rule to apply your desired style */
 .quick-reply-buttons .stButton > button,
 .feedback-buttons .stButton > button {
     display: inline-block !important;
@@ -121,13 +76,16 @@ html, body {
     transition: background 0.2s, color 0.2s !important;
     width: auto !important;
 }
+
 .quick-reply-buttons .stButton > button:hover,
 .feedback-buttons .stButton > button:hover {
     background: #e53935 !important;
     color: #fff !important;
 }
 
-/* --- CHAT BUBBLE STYLING --- */
+/* --- END OF BUTTON STYLING FIXES --- */
+
+
 .chat-bubble {
     padding: 1rem 1.5rem;
     border-radius: 20px;
@@ -172,8 +130,6 @@ html, body {
 .bot-row {
     display: flex; flex-direction: row; align-items: flex-end; justify-content: flex-start;
 }
-
-/* --- INPUT BAR --- */
 .input-bar {
     background: transparent !important;
     border-radius: 20px;
@@ -211,7 +167,7 @@ html, body {
     border: 1.5px solid #ff00;
 }
 
-/* --- ANIMATIONS & TITLES --- */
+/* Enhanced Sidebar Title */
 .sidebar-title {
     font-size: 5.5rem;
     color: #EE4B2B;
@@ -224,8 +180,13 @@ html, body {
     animation: rotate3D 5s infinite linear;
     transform-style: preserve-3d;
     perspective: 800px;
-    text-shadow: 0 0 5px rgba(238, 75, 43, 0.5), 0 0 10px rgba(238, 75, 43, 0.4), 0 0 15px rgba(238, 75, 43, 0.3), 1px 1px 2px rgba(0,0,0,0.8);
+    text-shadow:
+        0 0 5px rgba(238, 75, 43, 0.5),
+        0 0 10px rgba(238, 75, 43, 0.4),
+        0 0 15px rgba(238, 75, 43, 0.3),
+        1px 1px 2px rgba(0,0,0,0.8);
 }
+
 @keyframes rotate3D {
     0% { transform: rotateY(0deg) scale(1); }
     25% { transform: rotateY(90deg) scale(1.05); }
@@ -233,6 +194,8 @@ html, body {
     75% { transform: rotateY(270deg) scale(1.05); }
     100% { transform: rotateY(360deg) scale(1); }
 }
+
+/* Main Chatbot Title Enhancement */
 .elegant-heading {
     font-size: 4.5rem !important;
     font-weight: 900;
@@ -241,14 +204,16 @@ html, body {
     color: #ffffff;
     animation: fadeInUp 2.0s ease-out;
 }
+
 @keyframes fadeInUp {
     0% { opacity: 0; transform: translateY(20px); }
     100% { opacity: 1; transform: translateY(0); }
 }
 .transparent-spacer {
-    height: 150px;
-    background: transparent;
+height: 150px;           /* Adjust the vertical space */
+background: transparent;    /* Ensures it's see-through */
 }
+
 .typing-indicator {
     display: flex; align-items: center; margin-bottom: 1.1rem;
 }
@@ -265,7 +230,6 @@ html, body {
 }
 </style>
 """, unsafe_allow_html=True)
-
 
 # -------------------------------
 # Page Configuration
@@ -309,6 +273,7 @@ def load_knowledge_base(path):
 if 'df' not in st.session_state or 'nn_model' not in st.session_state:
     st.session_state.df, st.session_state.nn_model = load_knowledge_base(KNOWLEDGE_BASE_PATH)
     st.session_state.knowledge_base_loaded = True
+
 # -------------------------------
 # Helper Functions
 # -------------------------------
@@ -426,6 +391,17 @@ if not st.session_state.chat_started:
     with col2:
         st.button("Start Chat", key="start_chat_button")
 
+    # Inject JavaScript to find this exact button by its text and add a class
+    st.markdown("""
+    <script>
+    const btns = window.parent.document.querySelectorAll("button");
+    btns.forEach(btn => {
+        if (btn.innerText.trim() === "Start Chat") {
+            btn.classList.add("start-chat-btn");
+        }
+    });
+    </script>
+    """, unsafe_allow_html=True)
 
     # Handle button action AFTER JS
     if st.session_state.get("start_chat_button"):
@@ -474,6 +450,7 @@ else:
                 st.rerun()
     else:
         st.info("Trying to load the knowledge base...")
+
 # -------------------------------
 # Input Bar + Feedback
 # -------------------------------
@@ -502,13 +479,15 @@ if st.session_state.chat_started and not st.session_state.chat_ended:
         st.markdown('</div>', unsafe_allow_html=True)
 
     if st.session_state.feedback_request == False and st.session_state.show_quick_replies == False:
-       st.markdown('<div class="transparent-spacer"></div>', unsafe_allow_html=True)
+        st.markdown('<div class="transparent-spacer"></div>', unsafe_allow_html=True)
+    
     with st.form("chat_input_form", clear_on_submit=True):
         col1, col2 = st.columns([8, 1])
         with col1:
             user_input = st.text_input("user_input", placeholder="Type here...", key="input_bar", label_visibility="collapsed")
         with col2:
             send_clicked = st.form_submit_button("Send")
+        
         if send_clicked and user_input.strip():
             user_input_clean = user_input.lower().strip()
             st.session_state.messages.append({"role": "user", "content": user_input})
