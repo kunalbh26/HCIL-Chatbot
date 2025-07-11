@@ -209,11 +209,14 @@ html, body {
     0% { opacity: 0; transform: translateY(20px); }
     100% { opacity: 1; transform: translateY(0); }
 }
-.transparent-spacer {
+.transparent-spacer1 {
 height: 150px;           /* Adjust the vertical space */
 background: transparent;    /* Ensures it's see-through */
 }
-
+.transparent-spacer2 {
+height: 70px;           /* Adjust the vertical space */
+background: transparent;    /* Ensures it's see-through */
+}
 .typing-indicator {
     display: flex; align-items: center; margin-bottom: 1.1rem;
 }
@@ -375,7 +378,7 @@ for key, val in defaults.items():
         st.session_state[key] = val
 
 st.markdown("<h1 class='elegant-heading'>🤖 HCIL IT Helpdesk Chatbot</h1>", unsafe_allow_html=True)
-st.markdown('<div class="transparent-spacer"></div>', unsafe_allow_html=True)
+st.markdown('<div class="transparent-spacer1"></div>', unsafe_allow_html=True)
 
 
 # -------------------------------
@@ -479,7 +482,7 @@ if st.session_state.chat_started and not st.session_state.chat_ended:
         st.markdown('</div>', unsafe_allow_html=True)
 
     if st.session_state.feedback_request == False and st.session_state.show_quick_replies == False:
-        st.markdown('<div class="transparent-spacer"></div>', unsafe_allow_html=True)
+        st.markdown('<div class="transparent-spacer2"></div>', unsafe_allow_html=True)
     
     with st.form("chat_input_form", clear_on_submit=True):
         col1, col2 = st.columns([8, 1])
