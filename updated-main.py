@@ -382,7 +382,9 @@ for key, val in defaults.items():
         st.session_state[key] = val
 
 st.markdown("<h1 class='elegant-heading'>🤖 HCIL IT Helpdesk Chatbot</h1>", unsafe_allow_html=True)
-st.markdown("<div class="transparent-spacer"></div>", unsafe_allow_html=True)
+st.markdown('<div class="transparent-spacer"></div>', unsafe_allow_html=True)
+
+
 # -------------------------------
 # Chat App Flow
 # -------------------------------
