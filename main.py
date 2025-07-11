@@ -344,7 +344,7 @@ else:
            st.session_state.messages.append({"role": "user", "content": reply})
            st.session_state.show_typing = True
            st.rerun()
-     st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 
     if st.session_state.feedback_request:
