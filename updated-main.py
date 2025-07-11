@@ -39,17 +39,7 @@ html, body {
 
 /* --- BUTTON STYLING FIXES --- */
 
-/* 1. START CHAT BUTTON: Made selector specific to its container */
-.start-chat-container {
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    width: 100% !important;
-    margin: 3rem 0 !important;
-}
-
-/* TARGET Streamlit button inside the start-chat-container */
-.start-chat-container .stButton button {
+.start-chat-btn {
     background: linear-gradient(90deg, #e53935 0%, #b71c1c 100%) !important;
     color: #fff !important;
     border-radius: 25px !important;
@@ -63,12 +53,11 @@ html, body {
     display: block !important;
 }
 
-.start-chat-container .stButton button:hover {
+.start-chat-btn:hover {
     transform: scale(1.08) !important;
     color: #fff !important;
     border: 3px solid #fff !important;
 }
-
 
 /* 2. QUICK REPLY & FEEDBACK BUTTONS: New rule to apply your desired style */
 .quick-reply-buttons .stButton > button,
@@ -391,20 +380,30 @@ st.markdown('<div class="transparent-spacer"></div>', unsafe_allow_html=True)
 # Chat App Flow
 # -------------------------------
 if not st.session_state.chat_started:
-    st.markdown('<div class="start-chat-container">', unsafe_allow_html=True)
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        if st.button("Start Chat", key="start_chat"):
+            st.session_state.chat_started = True
+            st.session_state.show_quick_replies = True
+            st.session_state.messages.append({
+                "role": "bot",
+                "content": "👋 <b><span style='font-size:1.0em;color:#ffff;'>Konnichiwa!</span></b> How can I help you today?"
+            })
+            st.rerun()
 
-    # Use a placeholder to control where the button renders
-    btn_placeholder = st.empty()
-    if btn_placeholder.button("Start Chat", key="start_chat"):
-        st.session_state.chat_started = True
-        st.session_state.show_quick_replies = True
-        st.session_state.messages.append({
-            "role": "bot",
-            "content": "👋 <b><span style='font-size:1.0em;color:#ffff;'>Konnichiwa!</span></b> How can I help you today?"
-        })
-        st.rerun()
+        # 🔽 Place the JavaScript right after the button
+    st.markdown("""
+    <script>
+    const buttons = window.parent.document.querySelectorAll('button');
+    buttons.forEach(btn => {
+        if (btn.innerText === 'Start Chat') {
+            btn.classList.add('start-chat-btn');
+        }
+    });
+    </script>
+    """, unsafe_allow_html=True)
 
-    st.markdown('</div>', unsafe_allow_html=True)
+     st.markdown('</div>', unsafe_allow_html=True)
 else:
     if st.session_state.knowledge_base_loaded:
         render_chat(st.session_state.messages)
@@ -469,7 +468,7 @@ if st.session_state.chat_started and not st.session_state.chat_ended:
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
 
-    if st.session_state.feedback_request == False:
+    if st.session_state.feedback_request == False and st.session_state.show_quick_replies == False:
        st.markdown('<div class="transparent-spacer"></div>', unsafe_allow_html=True)
     with st.form("chat_input_form", clear_on_submit=True):
         col1, col2 = st.columns([8, 1])
