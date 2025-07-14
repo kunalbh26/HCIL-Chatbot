@@ -53,6 +53,10 @@ html, body {
     margin: auto auto !important;
     display: block !important;
 }
+#stBaseButton-secondary{
+margin : auto !important;
+}
+
 
 .start-chat-btn:hover {
     transform: scale(1.08) !important;
