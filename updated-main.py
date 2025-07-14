@@ -50,7 +50,7 @@ html, body {
     font-weight: bold !important;
     transition: transform 0.2s !important;
     min-width: 200px !important;
-    margin: 0 auto !important;
+    margin: auto auto !important;
     display: block !important;
 }
 
