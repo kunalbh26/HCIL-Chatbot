@@ -1,9 +1,0 @@
-streamlit
-pandas
-numpy
-sentence-transformers
-scikit-learn
-openpyxl
-fuzzywuzzy
-python-Levenshtein
-
